@@ -60,14 +60,18 @@ public class GUI extends Application {
         rootPane.setPrefSize(900, 600);
         rootPane.setPadding(new Insets(DEFAULT_SPACING));
 
-
         VBox loginPage = createLoginPage();
 
+        // set the landing page to the login page
         rootPane.setCenter(loginPage);
 
         return rootPane;
     }
 
+    /**
+     * Create the main login page for the application
+     * @return the VBox containing the login page
+     */
     private VBox createLoginPage() {
         VBox loginPage = new VBox();
 
@@ -138,7 +142,7 @@ public class GUI extends Application {
         logInButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-
+                // TODO
             }
         });
 
