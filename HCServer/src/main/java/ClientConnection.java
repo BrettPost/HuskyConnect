@@ -32,8 +32,9 @@ public class ClientConnection extends Thread{
 
             /*
             Lists Of Commands:
-            end, exit, quit, stop - terminates the program
-            connect - connects to the sql database
+            end, exit, quit, stop : disconnects from the HCServer
+            connect : connects to the sql database
+            disconnect : connects to the sql database
              */
             inputStream = new Scanner(socket.getInputStream());
             outputStream = new PrintStream(socket.getOutputStream());

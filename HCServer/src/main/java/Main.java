@@ -21,9 +21,9 @@ public class Main {
         newConnectionsListener.start();
 
         /*
-        Server ClientRPC's:
-        end, exit, quit, stop - terminates the program
-        count - number of active connections
+        Server-ONLY Commands:
+        end, exit, quit, stop : terminates the program
+        count : number of active connections
          */
 
         //listens for server ran commands
