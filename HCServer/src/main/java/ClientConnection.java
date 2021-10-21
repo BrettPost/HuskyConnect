@@ -16,6 +16,8 @@ public class ClientConnection extends Thread{
 
     Connection myConnection;
 
+    String username;
+
     ClientConnection(String threadName, Socket socket, ArrayList<ClientConnection> connections){
         super(threadName);
         this.socket=socket;
@@ -24,44 +26,49 @@ public class ClientConnection extends Thread{
     }
 
     /**
-     * runs a thread for listening to client command inputs
+     * runs a thread for listening to client command inputs (and executes said commands)
      */
     @Override
     public void run() {
         try{
 
             /*
-            Lists Of Commands:
             end, exit, quit, stop : disconnects from the HCServer
-            connect : connects to the sql database
-            disconnect : connects to the sql database
              */
             inputStream = new Scanner(socket.getInputStream());
             outputStream = new PrintStream(socket.getOutputStream());
             String nextLine = inputStream.nextLine();
             while(!nextLine.equals("end") && !nextLine.equals("exit") && !nextLine.equals("quit") && !nextLine.equals("stop")){
 
-                if(nextLine.equals("connect")){
-                    try{
-                        commandConnect();
-                        System.out.println(this.getName() + " connected to database");
-                        outputStream.println("connected to database");
-                    }catch (SQLException e){
-                        System.out.println(this.getName() + " failed to connect to database");
-                        outputStream.println("failed to connect to database");
-                    }
-                }else{
-                    outputStream.println("invalid command");
+                Scanner scan = new Scanner(nextLine);
+                String command = scan.next();
+
+                if(command.equals("connect")){
+                    commandConnect();
                 }
 
-                if(nextLine.equals("disconnect")){
-                    try{
-                        commandDisconnect();
-                        outputStream.println("disconnected from database");
-                    }catch (SQLException e){
-                        System.out.println(this.getName() + " failed to connect to database");
-                        outputStream.println("failed to disconnect to database");
+                if(command.equals("disconnect")){
+                    commandDisconnect();
+                }
+
+                if(command.equals("authenticate")){
+                    String username = "";
+                    String password = "";
+                    if(scan.hasNext()){
+                        username = scan.next();
                     }
+                    if(scan.hasNext()){
+                        password = scan.next();
+                    }
+                    commandAuthenticate(username, password);
+                }
+
+                if(command.equals("getprofile")){
+                    String username = "";
+                    if(scan.hasNext()){
+                        username = scan.next();
+                    }
+                    commandGetProfile(username);
                 }
 
                 nextLine = inputStream.nextLine();
@@ -71,25 +78,86 @@ public class ClientConnection extends Thread{
         }catch(Exception e){
             System.out.println(getName() + " disconnected");
         }
-
         //removes self from connections
         connections.remove(this);
     }
 
     /**
      * connects to SQL database
-     * @throws SQLException when failed to connect to database
      */
-    void commandConnect() throws SQLException {
-        myConnection = DriverManager.getConnection("jdbc:mysql://classdb.it.mtu.edu:3307/huskyconnect","huskyconnect_rw","C0nn3ct!");
+    void commandConnect(){
+        try{
+            myConnection = DriverManager.getConnection("jdbc:mysql://classdb.it.mtu.edu:3307/huskyconnect","huskyconnect_rw","C0nn3ct!");
+            System.out.println(this.getName() + " connected to database");
+            outputStream.println("connected to database");
+        }catch (SQLException e){
+            System.out.println(this.getName() + " failed to connect to database");
+            outputStream.println("failed to connect to database");
+        }
+
     }
 
     /**
      * disconnects from SQL database
-     * @throws SQLException when failed to disconnect from database
      */
-    void commandDisconnect() throws SQLException {
-        myConnection.close();
+    void commandDisconnect(){
+        try{
+            myConnection.close();
+            System.out.println(this.getName() + " disconnected from database");
+            outputStream.println("disconnected from database");
+        }catch (SQLException e){
+            System.out.println(this.getName() + " failed to disconnect from database");
+            outputStream.println("failed to disconnect to database");
+        }
+
+    }
+
+    /**
+     * authenticates the user, and saves authenticated user in this class instance in the username var
+     *
+     * sends a bool to the client on weather or not the authentication was successful
+     *
+     * @param username user's username
+     * @param password user's password
+     */
+    void commandAuthenticate(String username, String password){
+        try{
+            String sql = "select username, user_password from huskyconnect.user_profile where username = '" + username + "'";
+            Statement statement = myConnection.createStatement();
+            ResultSet result = statement.executeQuery(sql);
+            result.next();
+            if(result.getString("user_password").equals(password)){
+                this.username = username;
+                outputStream.print(true);
+                System.out.println(this.getName() + " logged in as " + username);
+            }else{
+                outputStream.print(false);
+            }
+        }catch (SQLException e){
+            System.out.println("SQL failed to run");
+            outputStream.print(false);
+        }
+
+
+    }
+
+    /**
+     * retrieves information on a profile
+     *
+     * sends information to the client
+     *
+     * @param username of the profile being retrieved
+     */
+    void commandGetProfile(String username){
+        try{
+            String sql = "select username, bio from huskyconnect.user_profile where username = '" + username + "'";
+            Statement statement = myConnection.createStatement();
+            ResultSet result = statement.executeQuery(sql);
+            result.next();
+            outputStream.println(result.getString("bio"));
+        }catch (SQLException e){
+            System.out.println("SQL failed to run");
+        }
     }
 
 
