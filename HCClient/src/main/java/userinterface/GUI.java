@@ -1,5 +1,6 @@
 package userinterface;
 
+import databaseconnections.ServerConnection;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -15,13 +16,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-
 import java.io.File;
 import java.net.URISyntaxException;
 
 
 public class GUI extends Application {
     public BorderPane rootPane;
+    public static ServerConnection serverConnection;
 
     private static final int DEFAULT_SPACING = 10;
 
@@ -142,14 +143,28 @@ public class GUI extends Application {
         logInButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                // TODO
+                String usernameStr = username.getText();
+                String passwordStr = password.getText();
+
+                if (usernameStr.isEmpty() || passwordStr.isEmpty()) {
+                    //TODO: Print message to page saying user must enter username/password
+                    System.out.println("empty username/password field");
+                }
+                else if (!serverConnection.commandLogin(username.getText(), password.getText())) {
+                    //TODO: Print message to page saying invalid username/password
+                    System.out.println("invalid username/password");
+                }
+                else {
+                    //TODO: Move to home page
+                    System.out.println("Successful Login!");
+                }
             }
         });
 
         signUpButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-
+                //TODO
             }
         });
 

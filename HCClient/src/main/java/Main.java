@@ -13,8 +13,8 @@ public class Main {
             System.out.println("failed to connect to server");
         }
 
+        GUI.serverConnection = serverConnection;
         GUI.start();
-
 
     }
 
@@ -24,5 +24,7 @@ public class Main {
     static void connectToServer() throws IOException {
         serverConnection = new ServerConnection();
         serverConnection.connect("localhost",1342);
-    }
+
+        serverConnection.commandConnect();
+        }
 }

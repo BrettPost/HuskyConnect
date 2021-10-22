@@ -128,16 +128,15 @@ public class ClientConnection extends Thread{
             result.next();
             if(result.getString("user_password").equals(password)){
                 this.username = username;
-                outputStream.print(true);
+                outputStream.println("true");
                 System.out.println(this.getName() + " logged in as " + username);
             }else{
-                outputStream.print(false);
+                outputStream.println(false);
             }
         }catch (SQLException e){
             System.out.println("SQL failed to run");
-            outputStream.print(false);
+            outputStream.println(false);
         }
-
 
     }
 
@@ -154,9 +153,10 @@ public class ClientConnection extends Thread{
             Statement statement = myConnection.createStatement();
             ResultSet result = statement.executeQuery(sql);
             result.next();
-            outputStream.println(result.getString("bio"));
+            outputStream.println(true + " " + result.getString("bio"));
         }catch (SQLException e){
             System.out.println("SQL failed to run");
+            outputStream.println(false);
         }
     }
 
