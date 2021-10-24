@@ -1,6 +1,12 @@
 package userinterface;
 
+import actors.User;
 import javafx.application.Application;
+import javafx.beans.binding.DoubleExpression;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,17 +20,22 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import javax.swing.*;
 import java.io.File;
+import java.util.Arrays;
+
+import static modules.HomePage.loadHomePage;
 
 
 public class GUI extends Application {
     public BorderPane rootPane;
-
-    private static final int DEFAULT_SPACING = 10;
-
+    public static User loggedInUser = null;
+    public static final int DEFAULT_SPACING = 10;
+    public static User huskyConnectUser = null;
     public static void start() {
         launch();
     }
@@ -44,6 +55,7 @@ public class GUI extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
+        huskyConnectUser =  new User("HuskyConnect", "hc", "The official HuskyConnect account!", loadImageResource("\\src\\main\\resources\\husky-connect-user-img.jpg"), this,"huskyconnect", "mtu", "huskies");
         Scene scene = new Scene(createRootPane());
         primaryStage.setScene(scene);
         primaryStage.setTitle("Husky Connect");
@@ -134,14 +146,23 @@ public class GUI extends Application {
         // BUTTON FUNCTIONALITY
         logInButton.setOnAction(event -> {
             // TODO
+            loggedInUser = new User("testUser", "test@testuser.com", "I like to test things :)", loadImageResource("default-user-icon.png"), this, "testing", "making things work!");
+            loggedInUser.addConnection(new User("a", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
+            loggedInUser.addConnection(new User("b", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
+            loggedInUser.addConnection(new User("c", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
+            loggedInUser.addConnection(new User("d", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
+            loggedInUser.addConnection(new User("e", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
+            loggedInUser.addConnection(new User("f", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
+
+            rootPane.setCenter(loadHomePage(this));
         });
 
-        signUpButton.setOnAction(event -> rootPane.setCenter(createSignUpPageAccountDetail()));
+        signUpButton.setOnAction(event -> rootPane.setCenter(createSignUpPageAccountDetail(null, null)));
 
         return loginPage;
     }
 
-    private VBox createSignUpPageAccountDetail() {
+    private VBox createSignUpPageAccountDetail(String usernameFill, String emailFill) {
         VBox signUpPage = new VBox();
 
         ImageView logo = new ImageView(
@@ -152,13 +173,24 @@ public class GUI extends Application {
 
         // text fields for user data entry
         Label emailText = new Label("Email");
-        TextField email = new TextField();
-        email.setPromptText("email");
+        TextField email;
+        if (emailFill != null) {
+            email = new TextField(emailFill);
+        } else {
+            email = new TextField();
+            email.setPromptText("email");
+
+        }
         VBox emailBox = new VBox(emailText, email);
 
+        TextField username;
+        if (usernameFill != null) {
+            username = new TextField(usernameFill);
+        } else {
+            username = new TextField();
+            username.setPromptText("username");
+        }
         Label usernameText = new Label("Username");
-        TextField username = new TextField();
-        username.setPromptText("username");
         VBox usernameBox = new VBox(usernameText, username);
 
         Label passwordText = new Label("Password");
@@ -197,18 +229,23 @@ public class GUI extends Application {
         imageBox.maxWidthProperty().bind(logo.fitWidthProperty());
 
         // BUTTON FUNCTIONALITY
-        next.setOnAction(event -> rootPane.setCenter(createSignUpPageProfileDetail()));
+        next.setOnAction(event -> rootPane.setCenter(createSignUpPageProfileDetail(username.getText(), email.getText())));
 
         back.setOnAction(event -> rootPane.setCenter(createLoginPage()));
         return signUpPage;
     }
 
-    private HBox createSignUpPageProfileDetail() {
+    private HBox createSignUpPageProfileDetail(String username, String email) {
         HBox profileDetails = new HBox();
 
         Image userIcon = loadImageResource("\\src\\main\\resources\\upload-user-icon.png");
 
         Circle clip = new Circle(1, 1, 1);
+
+        ImageView holding = new ImageView(
+                loadImageResource("\\src\\main\\resources\\default-user-icon.png")
+        ); // hold the image so it can be modified within a lambda
+
         clip.setFill(new ImagePattern(userIcon));
         VBox logoBox = new VBox(clip);
 
@@ -231,9 +268,9 @@ public class GUI extends Application {
         textFields.getChildren().add(bioBox);
 
         Button signUp = new Button("Sign up!");
-
-        textFields.getChildren().add(signUp);
-
+        Button back = new Button("Back");
+        HBox buttonBox = new HBox(back, signUp);
+        textFields.getChildren().add(buttonBox);
         profileDetails.getChildren().addAll(logoBox, textFields);
 
         // STYLING COMPONENTS
@@ -244,13 +281,20 @@ public class GUI extends Application {
         // set the spacing for the required panes to default
         profileDetails.setSpacing(DEFAULT_SPACING);
         textFields.setSpacing(DEFAULT_SPACING);
+        buttonBox.setSpacing(DEFAULT_SPACING);
 
         // allocate the correct amount of room to the panes
-        profileDetails.maxWidthProperty().bind(rootPane.widthProperty().divide(1));
+        profileDetails.maxWidthProperty().bind(rootPane.widthProperty());
         profileDetails.maxHeightProperty().bind(bioBox.maxHeightProperty().add(tagsBox.maxHeightProperty()));
 
-        signUp.maxWidthProperty().bind(profileDetails.widthProperty().divide(6));
         profileDetails.setAlignment(Pos.CENTER);
+        textFields.setAlignment(Pos.CENTER);
+        buttonBox.setAlignment(Pos.CENTER);
+        buttonBox.maxWidthProperty().bind(textFields.widthProperty());
+
+        signUp.minWidthProperty().bind(buttonBox.widthProperty().divide(3));
+        back.minWidthProperty().bind(buttonBox.widthProperty().divide(3));
+        buttonBox.spacingProperty().bind(textFields.widthProperty().divide(6));
 
         textFields.prefWidthProperty().bind(profileDetails.widthProperty().divide(3));
         logoBox.prefWidthProperty().bind(profileDetails.widthProperty().divide(6));
@@ -276,6 +320,7 @@ public class GUI extends Application {
                     clip.setFill(new ImagePattern(error));
                 } else {
                     // if it was, show the file they selected as the icon
+                    holding.setImage(logo);
                     clip.setFill(new ImagePattern(logo));
                 }
             } else {
@@ -283,6 +328,34 @@ public class GUI extends Application {
                 clip.setFill(new ImagePattern(error));
             }
         });
+
+        back.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                rootPane.setCenter(createSignUpPageAccountDetail(username, email));
+            }
+        });
+
+        GUI guiInstance = this;
+        signUp.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String[] tagsResponse = tags.getText().split(",");
+                Arrays.stream(tagsResponse).forEach(e -> e.strip());
+                System.out.println(holding.getImage().getUrl());
+                User newUser = new User(
+                        username,
+                        email,
+                        bio.getText(),
+                        holding.getImage(),
+                        guiInstance,
+                        tagsResponse);
+
+                loggedInUser = newUser;
+                rootPane.setCenter(loadHomePage(guiInstance));
+            }
+        });
+
 
         return profileDetails;
     }
@@ -295,7 +368,7 @@ public class GUI extends Application {
      *                 .png, .gif, or other supported by JavaFX Image.
      * @return the ImageView of the image located at the filepath
      */
-    private Image loadImageResource(String filePath) {
+    public static Image loadImageResource(String filePath) {
         // none of the other ways to get relative file path functioned with the JavaFX image class, so we've got this
         String root = System.getProperty("user.dir"); // retrieve the computer specific file path
 
@@ -305,11 +378,43 @@ public class GUI extends Application {
     }
 
     /**
+     * Create a label that scales along with the width and height
+     * @param content the content you want the label to hold
+     * @param width the width you want to scale the label with
+     * @param height the height you want to scale the label with
+     * @return a label that will scale along with the provided width and height
+     */
+    public static Label scaleableText(String content, DoubleExpression width, DoubleExpression height) {
+        Label title = new Label(content);
+
+        // align the title to the center of the box it's in
+        title.setTextAlignment(TextAlignment.CENTER);
+        title.setAlignment(Pos.CENTER);
+        // bind the title to the proper width for the list
+        title.prefWidthProperty().bind(width);
+        title.prefHeightProperty().bind(height);
+
+        // create a double property for the text size with a default of 20
+        DoubleProperty textSize = new SimpleDoubleProperty(20);
+
+        // set the font to the size of the property
+        title.setFont(Font.font(textSize.doubleValue()));
+
+        // scale factor of 10 to the width because it's not a perfect scale
+        textSize.bind(width.divide(10));
+
+        // listen for the textsize property changing and update the size of the text when it does
+        textSize.addListener((observable, oldValue, newValue) -> title.setFont(Font.font(textSize.doubleValue())));
+
+        return title;
+    }
+
+    /**
      * Highlight the borders of a pane. Used for debugging why certain visual elements may not be working
      * @param element the element to outline
      * @param color the color to outline it in
      */
-    private void HELP_HIGHLIGHT_PANE(Pane element, Color color) {
+    public static void HELP_HIGHLIGHT_PANE(Pane element, Color color) {
         element.setBorder(
                 new Border(
                         new BorderStroke(
