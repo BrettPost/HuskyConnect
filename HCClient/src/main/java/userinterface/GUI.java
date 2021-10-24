@@ -377,19 +377,45 @@ public class GUI extends Application {
         return resource;
     }
 
-    /**
-     * Create a label that scales along with the width and height
-     * @param content the content you want the label to hold
-     * @param width the width you want to scale the label with
-     * @param height the height you want to scale the label with
-     * @return a label that will scale along with the provided width and height
-     */
+    public static Label scaleableText(String content, DoubleExpression width, DoubleExpression height, Double textScale) {
+        Label title = new Label(content);
+
+        // align the title to the center of the box it's in
+        title.setTextAlignment(TextAlignment.CENTER);
+        title.setAlignment(Pos.CENTER);
+
+        // bind the title to the proper width for the list
+        title.prefWidthProperty().bind(width);
+        title.prefHeightProperty().bind(height);
+
+        // create a double property for the text size with a default of 20
+        DoubleProperty textSize = new SimpleDoubleProperty(20);
+
+        // set the font to the size of the property
+        title.setFont(Font.font(textSize.doubleValue()));
+
+        // scale factor of 10 to the width because it's not a perfect scale
+        textSize.bind(width.divide(textScale));
+
+        // listen for the textsize property changing and update the size of the text when it does
+        textSize.addListener((observable, oldValue, newValue) -> title.setFont(Font.font(textSize.doubleValue())));
+
+        return title;
+    }
+        /**
+         * Create a label that scales along with the width and height
+         * @param content the content you want the label to hold
+         * @param width the width you want to scale the label with
+         * @param height the height you want to scale the label with
+         * @return a label that will scale along with the provided width and height
+         */
     public static Label scaleableText(String content, DoubleExpression width, DoubleExpression height) {
         Label title = new Label(content);
 
         // align the title to the center of the box it's in
         title.setTextAlignment(TextAlignment.CENTER);
         title.setAlignment(Pos.CENTER);
+
         // bind the title to the proper width for the list
         title.prefWidthProperty().bind(width);
         title.prefHeightProperty().bind(height);

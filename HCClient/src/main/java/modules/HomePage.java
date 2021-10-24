@@ -1,10 +1,13 @@
 package modules;
 
 import javafx.geometry.HPos;
+import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import userinterface.GUI;
+
 
 public class HomePage {
 
@@ -24,13 +27,15 @@ public class HomePage {
         ColumnConstraints ccConst = new ColumnConstraints();
         ccConst.setPercentWidth(100);
         ccConst.setHalignment(HPos.CENTER);
+        homePage.setGridLinesVisible(true);
         homePage.getColumnConstraints().add(ccConst);
 
         // get the usrname of thel ogged in user and construct the welcome label to scale
         String user = GUI.loggedInUser.getUsername(); // retrieve this information from the database when the database is live
-        Label welcomeLabel = GUI.scaleableText("Welcome to HuskyConnect, " + user, homePage.widthProperty(), homePage.heightProperty().divide(25));
+        Label welcomeLabel = GUI.scaleableText("Welcome to HuskyConnect, " + user, homePage.widthProperty(), homePage.heightProperty(), 50.);
         // place it in a box
         VBox labelBox = new VBox(welcomeLabel);
+        labelBox.setAlignment(Pos.CENTER);
 
         // retrieve the user's feed
         VBox userFeed = GUI.loggedInUser.generateUserFeed();
@@ -44,6 +49,7 @@ public class HomePage {
         // bind the home page and user feed to the correct height
         homePage.prefWidthProperty().bind(guiInstance.rootPane.widthProperty().divide(2));
         userFeed.maxHeightProperty().bind(guiInstance.rootPane.heightProperty().multiply(2).divide(3));
+        labelBox.prefWidthProperty().bind(guiInstance.rootPane.widthProperty());
 
         return homePage;
     }

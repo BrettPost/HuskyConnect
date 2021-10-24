@@ -126,7 +126,7 @@ public class User {
 
         VBox imageBox = new VBox(logoCircle);
 
-        Label name = GUI.scaleableText(username, guiInstance.rootPane.heightProperty(), card.widthProperty().divide(20));
+        Label name = GUI.scaleableText(username, guiInstance.rootPane.heightProperty(), card.widthProperty(), 25.);
 
         HBox area = new HBox(name);
         area.setAlignment(Pos.CENTER);
