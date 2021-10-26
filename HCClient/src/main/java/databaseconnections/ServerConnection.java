@@ -67,9 +67,12 @@ public class ServerConnection {
      */
     public boolean commandLogin(String username, String password) {
         //send authenticate command to server
-        outputStream.println("authenticate " + username + " " + password);
-
-        return inputStream.nextBoolean(); //next thing server sends should be boolean
+        try{
+            outputStream.println("authenticate " + username + " " + password);
+            return inputStream.nextBoolean(); //next thing server sends should be boolean
+        }catch (Exception e){
+            return false;
+        }
     }
 
 
@@ -85,15 +88,20 @@ public class ServerConnection {
      */
     public String commandGetProfile(String username) {
         //send getprofile command to the server
-        outputStream.println("getprofile " + username);
+        try{
+            outputStream.println("getprofile " + username);
 
-        //ensure username was valid
-        if(inputStream.nextBoolean()) {
-            return inputStream.nextLine(); //server should send bio next (return bio)
+            //ensure username was valid
+            if(inputStream.nextBoolean()) {
+                return inputStream.nextLine(); //server should send bio next (return bio)
+            }
+            else {
+                return null;
+            }
+        }catch (Exception e){
+            return "N/A";
         }
-        else {
-            return null;
-        }
+
 
     }
 
