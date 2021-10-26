@@ -39,19 +39,24 @@ public class ServerConnection {
      *
      * @throws IOException when the connection to the database is refused
      */
-    public void commandConnect() throws IOException {
-        //opens the input and output streams
-        inputStream = new Scanner(socket.getInputStream());
-        outputStream = new PrintStream(socket.getOutputStream());
+    public void commandConnect(){
+        try{
+            //opens the input and output streams
+            inputStream = new Scanner(socket.getInputStream());
+            outputStream = new PrintStream(socket.getOutputStream());
 
-        //sends the command to the server
-        outputStream.println("connect");
-        String nextLine = inputStream.nextLine();
-        if(nextLine.equals("failed to connect to database")){
-            throw new IOException("failed to connect to database");
-        }else{
-            System.out.println(nextLine);
+            //sends the command to the server
+            outputStream.println("connect");
+            String nextLine = inputStream.nextLine();
+            if(nextLine.equals("failed to connect to database")){
+                throw new IOException("failed to connect to database");
+            }else{
+                System.out.println(nextLine);
+            }
+        }catch (Exception e){
+            System.out.println("failed to connect to database");
         }
+
     }
 
     /**
