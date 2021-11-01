@@ -1,5 +1,6 @@
 package userinterface;
 
+import databaseconnections.ServerConnection;
 import actors.User;
 import javafx.application.Application;
 import javafx.beans.binding.DoubleExpression;
@@ -33,6 +34,8 @@ import static modules.HomePage.loadHomePage;
 
 public class GUI extends Application {
     public BorderPane rootPane;
+    public static ServerConnection serverConnection;
+    
     public static User loggedInUser = null;
     public static final int DEFAULT_SPACING = 10;
     public static User huskyConnectUser = null;
@@ -145,16 +148,32 @@ public class GUI extends Application {
 
         // BUTTON FUNCTIONALITY
         logInButton.setOnAction(event -> {
-            // TODO
-            loggedInUser = new User("testUser", "test@testuser.com", "I like to test things :)", loadImageResource("default-user-icon.png"), this, "testing", "making things work!");
-            loggedInUser.addConnection(new User("a", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
-            loggedInUser.addConnection(new User("b", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
-            loggedInUser.addConnection(new User("c", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
-            loggedInUser.addConnection(new User("d", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
-            loggedInUser.addConnection(new User("e", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
-            loggedInUser.addConnection(new User("f", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
 
-            rootPane.setCenter(loadHomePage(this));
+            String usernameStr = username.getText();
+            String passwordStr = password.getText();
+
+            if (usernameStr.isEmpty() || passwordStr.isEmpty()) {
+                //TODO: Print message to page saying user must enter username/password
+                System.out.println("empty username/password field");
+            }
+            else if (!serverConnection.commandLogin(username.getText(), password.getText())) {
+                //TODO: Print message to page saying invalid username/password
+                System.out.println("invalid username/password");
+            }
+            else {
+                // TODO: remove this temporary home page populating
+                loggedInUser = new User("testUser", "test@testuser.com", "I like to test things :)", loadImageResource("default-user-icon.png"), this, "testing", "making things work!");
+                loggedInUser.addConnection(new User("a", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
+                loggedInUser.addConnection(new User("b", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
+                loggedInUser.addConnection(new User("c", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
+                loggedInUser.addConnection(new User("d", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
+                loggedInUser.addConnection(new User("e", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
+                loggedInUser.addConnection(new User("f", "b@gmail.com", "cdefghi", null, this, "#j", "#k", "#l"));
+
+                rootPane.setCenter(loadHomePage(this));
+                System.out.println("Successful Login!");
+            }
+
         });
 
         signUpButton.setOnAction(event -> rootPane.setCenter(createSignUpPageAccountDetail(null, null)));
@@ -340,6 +359,7 @@ public class GUI extends Application {
         signUp.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                //TODO
                 String[] tagsResponse = tags.getText().split(",");
                 Arrays.stream(tagsResponse).forEach(e -> e.strip());
                 System.out.println(holding.getImage().getUrl());
