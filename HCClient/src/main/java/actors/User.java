@@ -1,14 +1,18 @@
 package actors;
 
 import javafx.beans.binding.DoubleExpression;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+import pages.ProfilePage;
 import userinterface.GUI;
 
 import java.util.ArrayList;
@@ -20,10 +24,11 @@ public class User {
     private String username;
     private String email;
     private String bio;
-    private GUI guiInstance;
+    private GUI gui;
     private HashSet<String> tags;
     private Image icon;
     private List<User> connectedUsers;
+    private ProfilePage linkedPage;
 
     /**
      * Create a user object
@@ -37,13 +42,15 @@ public class User {
         this.email = email;
         this.bio = bio;
         this.icon = icon;
-        this.guiInstance = gui;
+        this.gui = gui;
 
         this.tags = new HashSet<>();
         this.tags.addAll(Arrays.asList(tags));
 
         this.connectedUsers = new ArrayList<>();
-        connectedUsers.add(GUI.huskyConnectUser);
+        if (!username.equals("HuskyConnect")) {
+            connectedUsers.add(GUI.huskyConnectUser);
+        }
     }
 
     public String getUsername() {
@@ -68,6 +75,14 @@ public class User {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public Image getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Image icon) {
+        this.icon = icon;
     }
 
     public HashSet<String> getTags() {
@@ -116,17 +131,19 @@ public class User {
         connectedUsers.add(connection);
     }
 
-    public BorderPane generateCardOnDoubleExpression(DoubleExpression scrollPaneBinding) {
+    public BorderPane generateCard() {
         BorderPane card = new BorderPane();
         Circle logoCircle = new Circle(1, 1, 1);
-        if (icon != null && !icon.isError())
-            logoCircle.setFill(new ImagePattern(icon));
-        else
-            logoCircle.setFill(new ImagePattern(GUI.loadImageResource("\\src\\main\\resources\\error-user-icon.png")));
+        if (icon == null || icon.isError())
+            icon = GUI.loadImageResource("\\src\\main\\resources\\default-user-icon.png");
+
+        logoCircle.setFill(new ImagePattern(icon));
 
         VBox imageBox = new VBox(logoCircle);
 
-        Label name = GUI.scaleableText(username, guiInstance.rootPane.heightProperty(), card.widthProperty(), 25.);
+        Label name = GUI.scaleableText(username, gui.rootPane.heightProperty(), card.widthProperty(), 25.);
+
+        User userInst = this;
 
         HBox area = new HBox(name);
         area.setAlignment(Pos.CENTER);
@@ -137,26 +154,35 @@ public class User {
         card.setCenter(area);
 
         //styling
-        logoCircle.radiusProperty().bind(guiInstance.rootPane.heightProperty().divide(18));
+        logoCircle.radiusProperty().bind(gui.rootPane.heightProperty().divide(18));
         profile.prefHeightProperty().bind(card.heightProperty());
-        profile.prefWidthProperty().bind(card.widthProperty().divide(8));
+        profile.prefWidthProperty().bind(card.widthProperty().divide(6));
 
-        DoubleExpression userWidthBaseBind = guiInstance.rootPane.widthProperty().divide(2);
+        DoubleExpression userWidthBaseBind = gui.rootPane.widthProperty().divide(2);
 
         card.prefWidthProperty().bind(userWidthBaseBind);
-        card.prefHeightProperty().bind(guiInstance.rootPane.heightProperty().divide(9));
+        card.prefHeightProperty().bind(gui.rootPane.heightProperty().divide(9));
 
         // TO DO look into making profiles look distinct
+        profile.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (linkedPage == null) {
+                    linkedPage = new ProfilePage(userInst, gui);
+                }
 
+                gui.rootPane.setCenter(linkedPage.generatePage());
+            }
+        });
         return card;
     }
 
     public VBox generateUserFeed() {
         VBox feed = new VBox();
-        DoubleExpression userWidthBaseBind = guiInstance.rootPane.widthProperty().divide(2);
+        DoubleExpression userWidthBaseBind = gui.rootPane.widthProperty().divide(2);
 
         // title the user feed
-        Label userFeed = GUI.scaleableText("User feed", userWidthBaseBind, guiInstance.rootPane.heightProperty().multiply(2).divide(3).divide(25));
+        Label userFeed = GUI.scaleableText("User feed", userWidthBaseBind, gui.rootPane.heightProperty().multiply(2).divide(3).divide(25));
         VBox userList = new VBox(); // create a list of users in form of vbox
 
         // make it so the user list is a scrollable entity
@@ -166,15 +192,16 @@ public class User {
 
         // add all of the connected users to the user feed
         for (var user : connectedUsers) {
-            userList.getChildren().add(user.generateCardOnDoubleExpression(scrollPane.widthProperty()));
+            System.out.println(user.username);
+            userList.getChildren().add(user.generateCard());
         }
 
-        // add the user feed and scrollpane to the feed
+        // add the user feed and scroll pane to the feed
         feed.getChildren().addAll(userFeed, scrollPane);
 
         // set the max width and height properties to their respective heights, and the feed to be centered
         feed.maxWidthProperty().bind(userWidthBaseBind);
-        feed.maxHeightProperty().bind(guiInstance.rootPane.heightProperty().multiply(2).divide(3));
+        feed.maxHeightProperty().bind(gui.rootPane.heightProperty().multiply(2).divide(3));
         feed.setAlignment(Pos.CENTER);
 
         // set the spacing to default
