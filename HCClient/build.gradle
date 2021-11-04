@@ -16,8 +16,12 @@ repositories {
 }
 
 dependencies {
-    compile 'org.controlsfx:controlsfx:8.40.14'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation 'org.controlsfx:controlsfx:8.40.14'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.2'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
     compile files('lib/mysql-connector-java-8.0.27.jar')
+
+
 }
 

@@ -1,6 +1,5 @@
 package userinterface;
 
-import databaseconnections.ServerConnection;
 import actors.User;
 import instances.LoginInstance;
 import javafx.application.Application;
@@ -20,7 +19,6 @@ import javafx.stage.Stage;
 
 public class GUI extends Application {
     public BorderPane rootPane;
-    public static ServerConnection serverConnection;
 
     public static User huskyConnectUser = null;
     public LoginInstance loginInstance = null;
