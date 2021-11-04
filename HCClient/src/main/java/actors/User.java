@@ -46,6 +46,7 @@ public class User {
         connectedUsers.add(GUI.huskyConnectUser);
     }
 
+
     public String getUsername() {
         return username;
     }

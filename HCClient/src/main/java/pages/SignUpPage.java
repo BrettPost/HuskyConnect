@@ -1,6 +1,7 @@
 package pages;
 
 import actors.User;
+import databaseconnections.HttpCon;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -23,7 +24,6 @@ import java.util.Arrays;
 import static pages.HomePage.loadHomePage;
 
 public class SignUpPage {
-
     public static VBox createSignUpPageAccountDetail(GUI gui, String usernameFill, String emailFill) {
         VBox signUpPage = new VBox();
 
@@ -91,14 +91,14 @@ public class SignUpPage {
         imageBox.maxWidthProperty().bind(logo.fitWidthProperty());
 
         // BUTTON FUNCTIONALITY
-        next.setOnAction(event -> gui.rootPane.setCenter(createSignUpPageProfileDetail(gui, username.getText(), email.getText())));
+        next.setOnAction(event -> gui.rootPane.setCenter(createSignUpPageProfileDetail(gui, username.getText(), email.getText(), password)));
 
         back.setOnAction(event -> gui.rootPane.setCenter(gui.loginInstance.createLoginPage()));
         return signUpPage;
     }
 
 
-    private static HBox createSignUpPageProfileDetail(GUI gui, String username, String email) {
+    private static HBox createSignUpPageProfileDetail(GUI gui, String username, String email, PasswordField password) {
         HBox profileDetails = new HBox();
 
         Image userIcon = GUI.loadImageResource("\\src\\main\\resources\\upload-user-icon.png");
@@ -198,11 +198,11 @@ public class SignUpPage {
                 gui.rootPane.setCenter(createSignUpPageAccountDetail(gui, username, email));
             }
         });
-
         signUp.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 //TODO
+
                 String[] tagsResponse = tags.getText().split(",");
                 Arrays.stream(tagsResponse).forEach(e -> e.strip());
                 System.out.println(holding.getImage().getUrl());
@@ -214,8 +214,11 @@ public class SignUpPage {
                         gui,
                         tagsResponse);
 
-                gui.loginInstance.loggedInUser = newUser;
-                gui.rootPane.setCenter(loadHomePage(gui));
+                //Stay on the current page if the user couldn't sign up for any reason
+                if(HttpCon.saveUser(newUser, password.getText())) {
+                    gui.loginInstance.loggedInUser = newUser;
+                    gui.rootPane.setCenter(loadHomePage(gui));
+                }
             }
         });
 
