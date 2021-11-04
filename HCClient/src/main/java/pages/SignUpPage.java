@@ -118,7 +118,6 @@ public class SignUpPage {
         Label tagsText = new Label("What're you interested in?");
         TextField tags = new TextField();
         tags.setPromptText("Prefix your tags with a # and start typing.");
-        // TextFields.bindAutoCompletion(tags, "#computer science", "#huskies", "#TSP");
 
         VBox tagsBox = new VBox(tagsText, tags);
         textFields.getChildren().add(tagsBox);
