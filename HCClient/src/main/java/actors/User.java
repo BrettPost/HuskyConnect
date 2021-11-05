@@ -1,5 +1,9 @@
 package actors;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import databaseconnections.HttpCon;
 import javafx.beans.binding.DoubleExpression;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -12,9 +16,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+import org.apache.http.HttpResponse;
 import pages.ProfilePage;
 import userinterface.GUI;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -23,12 +30,23 @@ import java.util.List;
 public class User {
     private String username;
     private String email;
+    private String full_name;
     private String bio;
     private GUI gui;
     private HashSet<String> tags;
     private Image icon;
     private List<User> connectedUsers;
     private ProfilePage linkedPage;
+
+    @SuppressWarnings("This constructor is nessisary for jackson-databind in getUser")
+    public User(){
+        //TODO add this default populated information to database
+        this.connectedUsers = new ArrayList<>();
+        this.tags = new HashSet<>();
+
+        this.gui = GUI.DEFUALT_GUI;
+
+    }
 
     /**
      * Create a user object
@@ -53,6 +71,64 @@ public class User {
         }
     }
 
+    public static User getUser(String username, Long token){
+        try{
+            HttpResponse response = HttpCon.getUser(username,token);
+
+            //Tests to see if the status of the http was a success
+            assert response != null;
+            if(response.getStatusLine().getStatusCode() == 200){
+
+                //maps the response to a user
+                ObjectMapper mapper = new ObjectMapper();
+                System.out.println("200");
+                return mapper.readValue(response.getEntity().getContent(), User.class);
+            }else {
+                //TODO separate out the different possible errors to display what went wrong to the user
+                //Http failed in some way (could simply be invalid token or username)
+                System.out.println("invalid token or username");
+                return null;
+            }
+
+        }catch (Exception e){
+            return null;
+        }
+
+    }
+
+    //TODO remove this as you should never need to get all users
+    public static User[] getUsers(Long token){
+        try{
+            HttpResponse response = HttpCon.getUsers(token);
+
+            //Tests to see if the status of the http was a success
+            assert response != null;
+            if(response.getStatusLine().getStatusCode() == 200){
+
+                //maps the response to a user
+                ObjectMapper mapper = new ObjectMapper();
+                System.out.println("200");
+                return mapper.readValue(response.getEntity().getContent(), User[].class);
+            }else {
+                //TODO separate out the different possible errors to display what went wrong to the user
+                //Http failed in some way (could simply be invalid token or username)
+                System.out.println("invalid token or username");
+                return null;
+            }
+
+        }catch (Exception e){
+            return null;
+        }
+
+    }
+
+    public String getFull_name() {
+        return full_name;
+    }
+
+    public void setFull_name(String full_name) {
+        this.full_name = full_name;
+    }
 
     public String getUsername() {
         return username;

@@ -3,7 +3,9 @@ package databaseconnections;
 import actors.User;
 import org.apache.http.*;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.DefaultHttpResponseFactory;
@@ -71,33 +73,70 @@ public class HttpCon {
      * @param password The password parsed from GUI input
      * @return  true/false depending on success/failure
      */
-        public static boolean saveUser(User user, String password){
-            try {
-                HttpPost request = new HttpPost(URL + "/users/");
+    public static boolean saveUser(User user, String password){
+        try {
+            HttpPost request = new HttpPost(URL + "/users/");
 
-                //Check if the user already exists
-                if(login(user.getUsername(),password).getStatusLine().getStatusCode()==200) {
-                    System.out.println("Account already exists");
-                    return false;
-                }
-
-                //Convert parsed info into JSON
-                String JSON_STRING = "{\n" +
-                                            "\"username\": \""+user.getUsername()+"\",\n" +
-                                            "\"password\": \""+password+"\",\n" +
-                                            "\"full_name\": \"john\",\n"+
-                                            "\"email\": \""+user.getEmail()+"\",\n" +
-                                            "\"bio\": \"john\"\n"+
-                                        "}";
-
-                StringEntity requestEntity = new StringEntity(JSON_STRING, ContentType.APPLICATION_JSON);
-                request.setEntity(requestEntity);
-                System.out.println(client.execute(request));
-                return true;
-                
-            } catch (Exception e) {
-                e.printStackTrace();
+            //Check if the user already exists
+            if(login(user.getUsername(),password).getStatusLine().getStatusCode()==200) {
+                System.out.println("Account already exists");
                 return false;
             }
+
+            //Convert parsed info into JSON
+            String JSON_STRING = "{\n" +
+                    "\"username\": \""+user.getUsername()+"\",\n" +
+                    "\"password\": \""+password+"\",\n" +
+                    "\"full_name\": \"john\",\n"+
+                    "\"email\": \""+user.getEmail()+"\",\n" +
+                    "\"bio\": \"john\"\n"+
+                    "}";
+
+            StringEntity requestEntity = new StringEntity(JSON_STRING, ContentType.APPLICATION_JSON);
+            request.setEntity(requestEntity);
+            System.out.println(client.execute(request));
+            return true;
+                
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
+    }
+
+    /**
+     * gets a user
+     * @param username username of user
+     * @param token token for authentication
+     * @return httpResponse with user as json in body
+     */
+    public static HttpResponse getUser(String username,Long token){
+
+        try {
+            URIBuilder builder = new URIBuilder(URL + "/users/"+username);
+            builder.setParameter("tokenId", token.toString());
+            var request = new HttpGet(builder.build());
+
+            return client.execute(request);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new DefaultHttpResponseFactory().newHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_NOT_FOUND, null), null);
+        }
+
+    }
+
+    //TODO remove this as you should never need to get all users
+    public static HttpResponse getUsers(Long token){
+
+        try {
+            URIBuilder builder = new URIBuilder(URL + "/users/users");
+            builder.setParameter("tokenId", token.toString());
+            var request = new HttpGet(builder.build());
+
+            return client.execute(request);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new DefaultHttpResponseFactory().newHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_NOT_FOUND, null), null);
+        }
+
+    }
 }

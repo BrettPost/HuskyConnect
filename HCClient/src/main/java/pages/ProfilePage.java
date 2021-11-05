@@ -33,7 +33,12 @@ public class ProfilePage {
             tagsText += "#" + tag + ", ";
         }
 
-        tags.setText(tagsText.substring(0, tagsText.length()-2));
+        if(tagsText.length() > 2){
+            tags.setText(tagsText.substring(0, tagsText.length()-2));
+        }else{
+            tags.setText("");
+        }
+
         description.setText(linkedUser.getBio());
         userFeed = linkedUser.generateUserFeed();
         icon.setFill(new ImagePattern(linkedUser.getIcon()));

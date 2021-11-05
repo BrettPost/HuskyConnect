@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -35,6 +36,27 @@ public class UserController {
         try {
             User user = userService.getUser(username);
             return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    //TODO this is temporary, as we will never want to get ALL users in the future
+    /**
+     * gets all users
+     * @param tokenId tokenId that is required to authenticated being logged in
+     * @return user data in json form
+     */
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> get(@RequestParam String tokenId) {
+        //Authentication
+        if(Authenticator.getAccess( Long.parseLong(tokenId) ) == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            List<User> users = userService.getUsers();
+            return new ResponseEntity<>(users, HttpStatus.OK);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

@@ -34,8 +34,14 @@ public class User {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    /**
+     * tests if a password is the same as this users password
+     * @param password password being tested
+     * @return if the password is the same
+     */
+    public boolean passwordEquals(String password) {
+
+        return this.password.equals(password);
     }
 
     public void setPassword(String password) {

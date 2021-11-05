@@ -154,13 +154,12 @@ public class LoginInstance {
             }
             else {
                 // TODO: remove this temporary home page populating
-                loggedInUser = new User("testUser", "test@testuser.com", "I like to test things :)", loadImageResource("default-user-icon.png"), gui, "testing", "making things work!");
-                loggedInUser.addConnection(new User("a", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
-                loggedInUser.addConnection(new User("b", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
-                loggedInUser.addConnection(new User("c", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
-                loggedInUser.addConnection(new User("d", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
-                loggedInUser.addConnection(new User("e", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
-                loggedInUser.addConnection(new User("f", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
+                loggedInUser = User.getUser("demo", token);
+                User[] users = User.getUsers(token);
+                for (User user :
+                        users) {
+                    loggedInUser.addConnection(user);
+                }
 
                 gui.rootPane.setCenter(loadHomePage(gui));
                 System.out.println("Successful Login!");

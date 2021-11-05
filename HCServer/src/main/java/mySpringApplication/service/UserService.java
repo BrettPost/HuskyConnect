@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Transactional
 public class UserService {
@@ -21,7 +24,7 @@ public class UserService {
      */
     public long login(String username, String password) throws Exception{
         if(userRepository.findById(username).isPresent()){
-            if(userRepository.findById(username).get().getPassword().equals(password)){
+            if(userRepository.findById(username).get().passwordEquals(password)){
                 return Authenticator.makeToken(userRepository.findById(username).get());
             }else{
                 throw new Exception("Login failed");
@@ -45,6 +48,10 @@ public class UserService {
             return null;
         }
 
+    }
+
+    public List<User> getUsers(){
+        return userRepository.findAll();
     }
 
     public void deleteUser(User user) {
