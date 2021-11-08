@@ -36,7 +36,7 @@ public class HomePage {
         labelBox.setAlignment(Pos.CENTER);
 
         // retrieve the user's feed
-        VBox userFeed = guiInstance.loginInstance.loggedInUser.generateUserFeed();
+        VBox userFeed = guiInstance.loginInstance.loggedInUser.generateConnectionsList(guiInstance);
 
         //create a top bar
         HBox topBar = TopBar.createTopBar(guiInstance);

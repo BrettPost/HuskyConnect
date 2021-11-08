@@ -210,7 +210,6 @@ public class SignUpPage {
                         email,
                         bio.getText(),
                         holding.getImage(),
-                        gui,
                         tagsResponse);
 
                 //Stay on the current page if the user couldn't sign up for any reason

@@ -40,7 +40,7 @@ public class ProfilePage {
         }
 
         description.setText(linkedUser.getBio());
-        userFeed = linkedUser.generateUserFeed();
+        userFeed = linkedUser.generateConnectionsList(gui);
         icon.setFill(new ImagePattern(linkedUser.getIcon()));
 
         tags.setEditable(false);

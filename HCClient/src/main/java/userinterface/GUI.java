@@ -19,8 +19,6 @@ import javafx.stage.Stage;
 
 public class GUI extends Application {
 
-    //TODO come up with a better solution for giving users generated via database a version of gui
-    public static GUI DEFUALT_GUI;
 
     public BorderPane rootPane;
 
@@ -49,11 +47,8 @@ public class GUI extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        //TODO read todo at declaration
-        DEFUALT_GUI = this;
-
-        huskyConnectUser =  new User("HuskyConnect", "hc", "The official HuskyConnect account!", loadImageResource("\\src\\main\\resources\\husky-connect-user-img.jpg"), this,"huskyconnect", "mtu", "huskies");
-        User huskyConnectFriend = new User("HuskyFriend", "friend@husky.net", "I'm a friend of husky connect!", null, this, "huskyconnect", "friendship", "testing");
+        huskyConnectUser =  new User("HuskyConnect", "hc", "The official HuskyConnect account!", loadImageResource("\\src\\main\\resources\\husky-connect-user-img.jpg"), "huskyconnect", "mtu", "huskies");
+        User huskyConnectFriend = new User("HuskyFriend", "friend@husky.net", "I'm a friend of husky connect!", null,  "huskyconnect", "friendship", "testing");
         huskyConnectUser.addConnection(huskyConnectFriend);
         Scene scene = new Scene(createRootPane());
         primaryStage.setScene(scene);

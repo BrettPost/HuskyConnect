@@ -32,7 +32,6 @@ public class User {
     private String email;
     private String full_name;
     private String bio;
-    private GUI gui;
     private HashSet<String> tags;
     private Image icon;
     private List<User> connectedUsers;
@@ -44,7 +43,6 @@ public class User {
         this.connectedUsers = new ArrayList<>();
         this.tags = new HashSet<>();
 
-        this.gui = GUI.DEFUALT_GUI;
 
     }
 
@@ -55,12 +53,11 @@ public class User {
      * @param bio the user's bio
      * @param tags the user's tags
      */
-    public User(String username, String email, String bio, Image icon, GUI gui, String... tags) {
+    public User(String username, String email, String bio, Image icon, String... tags) {
         this.username = username;
         this.email = email;
         this.bio = bio;
         this.icon = icon;
-        this.gui = gui;
 
         this.tags = new HashSet<>();
         this.tags.addAll(Arrays.asList(tags));
@@ -208,7 +205,7 @@ public class User {
         connectedUsers.add(connection);
     }
 
-    public BorderPane generateCard() {
+    public BorderPane generateCard(GUI gui) {
         BorderPane card = new BorderPane();
         Circle logoCircle = new Circle(1, 1, 1);
         if (icon == null || icon.isError())
@@ -240,7 +237,7 @@ public class User {
         card.prefWidthProperty().bind(userWidthBaseBind);
         card.prefHeightProperty().bind(gui.rootPane.heightProperty().divide(9));
 
-        // TO DO look into making profiles look distinct
+        // TODO look into making profiles look distinct
         profile.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -254,7 +251,7 @@ public class User {
         return card;
     }
 
-    public VBox generateUserFeed() {
+    public VBox generateConnectionsList(GUI gui) {
         VBox feed = new VBox();
         DoubleExpression userWidthBaseBind = gui.rootPane.widthProperty().divide(2);
 
@@ -270,7 +267,7 @@ public class User {
         // add all of the connected users to the user feed
         for (var user : connectedUsers) {
             System.out.println(user.username);
-            userList.getChildren().add(user.generateCard());
+            userList.getChildren().add(user.generateCard(gui));
         }
 
         // add the user feed and scroll pane to the feed
