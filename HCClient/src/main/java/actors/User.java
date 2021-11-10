@@ -1,5 +1,7 @@
 package actors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import databaseconnections.HttpCon;
 import javafx.beans.binding.DoubleExpression;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -8,10 +10,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+import org.apache.http.HttpResponse;
 import pages.ProfilePage;
 import userinterface.GUI;
 
@@ -23,12 +25,21 @@ import java.util.List;
 public class User {
     private String username;
     private String email;
+    private String full_name;
     private String bio;
-    private GUI gui;
     private HashSet<String> tags;
     private Image icon;
     private List<User> connectedUsers;
     private ProfilePage linkedPage;
+
+    /**
+     * default constructor for jackson databind
+     */
+    public User(){
+        //TODO make this stuff populated from database
+        this.tags = new HashSet<>();
+        this.connectedUsers = new ArrayList<>();
+    }
 
     /**
      * Create a user object
@@ -37,22 +48,48 @@ public class User {
      * @param bio the user's bio
      * @param tags the user's tags
      */
-    public User(String username, String email, String bio, Image icon, GUI gui, String... tags) {
+    public User(String username, String email, String bio, Image icon, String... tags) {
         this.username = username;
         this.email = email;
         this.bio = bio;
         this.icon = icon;
-        this.gui = gui;
 
         this.tags = new HashSet<>();
         this.tags.addAll(Arrays.asList(tags));
 
         this.connectedUsers = new ArrayList<>();
-        if (!username.equals("HuskyConnect")) {
-            connectedUsers.add(GUI.huskyConnectUser);
-        }
     }
 
+    /**
+     * makes a user by pulling information from the database
+     * @param username username of user being grabbed
+     * @param token authentication proof
+     * @return user of the username provided. Returns null if http failed to get the user for any reason
+     */
+    public static User getUser(String username, Long token){
+        try{
+            HttpResponse response = HttpCon.getUser(username,token);
+
+            //Tests to see if the status of the http was a success
+            assert response != null;
+            if(response.getStatusLine().getStatusCode() == 200){
+                //maps the response to a user
+                ObjectMapper mapper = new ObjectMapper();
+                return mapper.readValue(response.getEntity().getContent(), User.class);
+            }else {
+                //TODO separate out the different possible errors to display what went wrong to the user
+                //Http failed in some way (could simply be invalid token or username)
+                System.out.println("failed to get user from database");
+                System.out.println(response.getStatusLine());
+                return null;
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+
+    }
 
     public String getUsername() {
         return username;
@@ -88,6 +125,14 @@ public class User {
 
     public HashSet<String> getTags() {
         return tags;
+    }
+
+    public String getFull_name() {
+        return full_name;
+    }
+
+    public void setFull_name(String full_name) {
+        this.full_name = full_name;
     }
 
     /**
@@ -132,7 +177,12 @@ public class User {
         connectedUsers.add(connection);
     }
 
-    public BorderPane generateCard() {
+    /**
+     * generates a card for this users profile
+     * @param gui the gui this card will be added to
+     * @return the card created
+     */
+    public BorderPane generateCard(GUI gui) {
         BorderPane card = new BorderPane();
         Circle logoCircle = new Circle(1, 1, 1);
         if (icon == null || icon.isError())
@@ -164,7 +214,6 @@ public class User {
         card.prefWidthProperty().bind(userWidthBaseBind);
         card.prefHeightProperty().bind(gui.rootPane.heightProperty().divide(9));
 
-        // TO DO look into making profiles look distinct
         profile.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -178,7 +227,13 @@ public class User {
         return card;
     }
 
-    public VBox generateUserFeed() {
+    /**
+     * Generates a user feed for this user
+     * @param gui the gui this user feed will be added to
+     * @return the user feed
+     */
+    //TODO make this user feed smarter and not just pull from connections
+    public VBox generateUserFeed(GUI gui) {
         VBox feed = new VBox();
         DoubleExpression userWidthBaseBind = gui.rootPane.widthProperty().divide(2);
 
@@ -191,11 +246,8 @@ public class User {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.fitToWidthProperty().setValue(true);
 
-        // add all of the connected users to the user feed
-        for (var user : connectedUsers) {
-            System.out.println(user.username);
-            userList.getChildren().add(user.generateCard());
-        }
+        //TODO remove this, as self shouldn be in user feed, its for testing]
+        userList.getChildren().add(this.generateCard(gui));
 
         // add the user feed and scroll pane to the feed
         feed.getChildren().addAll(userFeed, scrollPane);

@@ -1,6 +1,5 @@
 package userinterface;
 
-import actors.User;
 import instances.LoginInstance;
 import javafx.application.Application;
 import javafx.beans.binding.DoubleExpression;
@@ -20,7 +19,6 @@ import javafx.stage.Stage;
 public class GUI extends Application {
     public BorderPane rootPane;
 
-    public static User huskyConnectUser = null;
     public LoginInstance loginInstance = null;
 
     public static final int DEFAULT_SPACING = 10;
@@ -44,9 +42,6 @@ public class GUI extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
-        huskyConnectUser =  new User("HuskyConnect", "hc", "The official HuskyConnect account!", loadImageResource("\\src\\main\\resources\\husky-connect-user-img.jpg"), this,"huskyconnect", "mtu", "huskies");
-        User huskyConnectFriend = new User("HuskyFriend", "friend@husky.net", "I'm a friend of husky connect!", null, this, "huskyconnect", "friendship", "testing");
-        huskyConnectUser.addConnection(huskyConnectFriend);
         Scene scene = new Scene(createRootPane());
         primaryStage.setScene(scene);
         primaryStage.setTitle("Husky Connect");

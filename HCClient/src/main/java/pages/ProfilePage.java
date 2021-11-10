@@ -28,14 +28,18 @@ public class ProfilePage {
         this.gui = gui;
         nameField.setText(linkedUser.getUsername());
 
-        String tagsText = "";
+        StringBuilder tagsTextBuilder = new StringBuilder();
         for (var tag : linkedUser.getTags()) {
-            tagsText += "#" + tag + ", ";
+            tagsTextBuilder.append("#").append(tag).append(", ");
         }
-
+        String tagsText = tagsTextBuilder.toString();
+        //Prevents stringindexoutofbounds on tags.settext (for users with no tags)
+        if(tagsText.equals("")){
+            tagsText = ", ";
+        }
         tags.setText(tagsText.substring(0, tagsText.length()-2));
         description.setText(linkedUser.getBio());
-        userFeed = linkedUser.generateUserFeed();
+        userFeed = linkedUser.generateUserFeed(gui);
         icon.setFill(new ImagePattern(linkedUser.getIcon()));
 
         tags.setEditable(false);
@@ -43,6 +47,10 @@ public class ProfilePage {
         nameField.setEditable(false);
     }
 
+    /**
+     * generates a page for the linked user
+     * @return a profile page
+     */
     public HBox generatePage() {
         // DEFINITIONS
         HBox page = new HBox();

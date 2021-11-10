@@ -21,7 +21,7 @@ public class UserService {
      */
     public long login(String username, String password) throws Exception{
         if(userRepository.findById(username).isPresent()){
-            if(userRepository.findById(username).get().getPassword().equals(password)){
+            if(userRepository.findById(username).get().passwordEquals(password)){
                 return Authenticator.makeToken(userRepository.findById(username).get());
             }else{
                 throw new Exception("Login failed");
