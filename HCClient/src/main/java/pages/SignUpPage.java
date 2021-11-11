@@ -212,10 +212,9 @@ public class SignUpPage {
                         holding.getImage(),
                         gui,
                         tagsResponse);
-
                 //Stay on the current page if the user couldn't sign up for any reason
                 if(HttpCon.saveUser(newUser, password.getText())) {
-                    gui.loginInstance.loggedInUser = newUser;
+                    gui.loginInstance.setLoggedInUser(newUser);
                     gui.rootPane.setCenter(loadHomePage(gui));
                 }
             }

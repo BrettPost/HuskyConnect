@@ -36,8 +36,6 @@ public class TopBar {
         HBox topBar = new HBox(leftTopBar, spacer, rightTopBar);
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-
-
         //Home Icon
         ImageView homeIconView = new ImageView(
                 GUI.loadImageResource("\\src\\main\\resources\\home-icon3.0.png")
@@ -140,7 +138,7 @@ public class TopBar {
         leftTopBar.setAlignment(Pos.CENTER_LEFT);
         rightTopBar.setAlignment(Pos.CENTER_RIGHT);
 
-
+        topBar.prefWidthProperty().bind(gui.rootPane.widthProperty());
 
 
 
@@ -165,8 +163,8 @@ public class TopBar {
 
         //inbox icon
         profileBox.setOnMouseClicked( event -> {
-            //TODO: Go To Profile Page
-            System.out.println("Profile Icon Clicked");
+            ProfilePage profilePage = gui.loginInstance.loggedInUser.getLinkedPage();
+            gui.rootPane.setCenter(profilePage.generatePage());
         });
 
         //exit button

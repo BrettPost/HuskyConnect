@@ -38,12 +38,7 @@ public class HomePage {
         // retrieve the user's feed
         VBox userFeed = guiInstance.loginInstance.loggedInUser.generateUserFeed();
 
-        //create a top bar
-        HBox topBar = TopBar.createTopBar(guiInstance);
-
         // add all three to the home page.
-        // column 0, row 0 will set the top bar to be at the top of the page
-        homePage.add(topBar, 0, 0);
         // column 0, row 1 will set the welcome message to be 1/8 down the page
         homePage.add(labelBox, 0, 1);
         // column 0, row 2 will set the user feed to be 1/4 down the page
@@ -51,7 +46,6 @@ public class HomePage {
 
         // bind the home page and user feed to the correct height
         homePage.prefWidthProperty().bind(guiInstance.rootPane.widthProperty().divide(2));
-        topBar.prefWidthProperty().bind(guiInstance.rootPane.widthProperty());
         userFeed.maxHeightProperty().bind(guiInstance.rootPane.heightProperty().multiply(2).divide(3));
         labelBox.prefWidthProperty().bind(guiInstance.rootPane.widthProperty());
 

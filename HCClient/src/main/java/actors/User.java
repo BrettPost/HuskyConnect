@@ -79,6 +79,9 @@ public class User {
     }
 
     public Image getIcon() {
+        if (icon == null || icon.isError()) {
+            icon = GUI.loadImageResource("\\src\\main\\resources\\default-user-icon.jpg");
+        }
         return icon;
     }
 
@@ -132,6 +135,13 @@ public class User {
         connectedUsers.add(connection);
     }
 
+    public ProfilePage getLinkedPage() {
+        if (linkedPage == null) {
+            linkedPage = new ProfilePage(this, gui);
+        }
+        return linkedPage;
+    }
+
     public BorderPane generateCard() {
         BorderPane card = new BorderPane();
         Circle logoCircle = new Circle(1, 1, 1);
@@ -143,8 +153,6 @@ public class User {
         VBox imageBox = new VBox(logoCircle);
 
         Label name = GUI.scaleableText(username, gui.rootPane.heightProperty(), card.widthProperty(), 25.);
-
-        User userInst = this;
 
         HBox area = new HBox(name);
         area.setAlignment(Pos.CENTER);
@@ -168,11 +176,7 @@ public class User {
         profile.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if (linkedPage == null) {
-                    linkedPage = new ProfilePage(userInst, gui);
-                }
-
-                gui.rootPane.setCenter(linkedPage.generatePage());
+                gui.rootPane.setCenter(getLinkedPage().generatePage());
             }
         });
         return card;

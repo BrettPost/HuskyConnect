@@ -12,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.apache.http.HttpResponse;
 import pages.SignUpPage;
+import pages.TopBar;
 import userinterface.GUI;
 
 import java.io.BufferedReader;
@@ -31,6 +32,11 @@ public class LoginInstance {
         this.gui = gui;
     }
 
+
+    public void setLoggedInUser(User user) {
+        loggedInUser = user;
+        gui.rootPane.setTop(TopBar.createTopBar(gui));
+    }
     /**
      * attempts to login, and store the token in this class
      * @param username username of user
@@ -154,7 +160,7 @@ public class LoginInstance {
             }
             else {
                 // TODO: remove this temporary home page populating
-                loggedInUser = new User("testUser", "test@testuser.com", "I like to test things :)", loadImageResource("default-user-icon.png"), gui, "testing", "making things work!");
+                setLoggedInUser(new User("testUser", "test@testuser.com", "I like to test things :)", loadImageResource("default-user-icon.png"), gui, "testing", "making things work!"));
                 loggedInUser.addConnection(new User("a", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
                 loggedInUser.addConnection(new User("b", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
                 loggedInUser.addConnection(new User("c", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
