@@ -1,6 +1,7 @@
 package instances;
 
 import actors.User;
+import databaseconnections.HttpCon;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -9,8 +10,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import org.apache.http.HttpResponse;
 import pages.SignUpPage;
 import userinterface.GUI;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 import static pages.HomePage.loadHomePage;
 import static userinterface.GUI.loadImageResource;
@@ -19,8 +24,54 @@ public class LoginInstance {
     public User loggedInUser = null;
     GUI gui;
 
+    public Long token = null;
+
+
     public LoginInstance(GUI gui) {
         this.gui = gui;
+    }
+
+    /**
+     * attempts to login, and store the token in this class
+     * @param username username of user
+     * @param password password of user
+     * @return true if login success, false if login failed
+     */
+    boolean login(String username, String password){
+
+        try{
+            HttpResponse response = HttpCon.login(username,password);
+
+            //Tests to see if the status of the http was a success
+            assert response != null;
+            if(response.getStatusLine().getStatusCode() == 200){
+
+                //reads the content of the http response
+                var bufReader = new BufferedReader(new InputStreamReader(
+                        response.getEntity().getContent()));
+
+                var builder = new StringBuilder();
+
+                String line;
+
+                while ((line = bufReader.readLine()) != null) {
+
+                    builder.append(line);
+                    builder.append(System.lineSeparator());
+                }
+
+                token = Long.parseLong( builder.toString().strip());
+                return true;
+            }else {
+                //Http failed in some way (could simply be incorrect username/password)
+                System.out.println("incorrect username or password");
+                return false;
+            }
+
+        }catch (Exception e){
+            return false;
+        }
+
     }
 
     /**
@@ -97,7 +148,7 @@ public class LoginInstance {
                 //TODO: Print message to page saying user must enter username/password
                 System.out.println("empty username/password field");
             }
-            else if (!GUI.serverConnection.commandLogin(username.getText(), password.getText())) {
+            else if (!login(usernameStr,passwordStr)) {
                 //TODO: Print message to page saying invalid username/password
                 System.out.println("invalid username/password");
             }
