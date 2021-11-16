@@ -60,7 +60,7 @@ public class HttpCon {
 
             return client.execute(request);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return new DefaultHttpResponseFactory().newHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_NOT_FOUND, null), null);
         }
     }
