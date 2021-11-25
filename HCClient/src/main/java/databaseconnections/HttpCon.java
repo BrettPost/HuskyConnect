@@ -16,6 +16,7 @@ import org.apache.http.message.BasicStatusLine;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -108,6 +109,7 @@ public class HttpCon {
                     "\"full_name\": \"john\",\n"+
                     "\"email\": \""+user.getEmail()+"\",\n" +
                     "\"bio\": \"john\"\n"+
+                    "\"imgBlob\": \""+ Arrays.toString(user.getImgBlob()) +"\",\n" +
                     "}";
 
             StringEntity requestEntity = new StringEntity(JSON_STRING, ContentType.APPLICATION_JSON);

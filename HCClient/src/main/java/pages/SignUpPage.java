@@ -170,7 +170,7 @@ public class SignUpPage {
             // create a file selection dialog.
             // (This is a swing element, because the JavaFX one doesn't fit the needs of the UI)
             JFileChooser fileChooser = new JFileChooser();
-            Image error = GUI.loadImageResource("\\src\\main\\resources\\error-user-icon.png");
+            Image error = GUI.loadImageResource("src\\main\\resources\\error-user-icon.png");
             // if the file chooser correctly opens
             if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile(); // retrieve the user selected file
@@ -209,7 +209,7 @@ public class SignUpPage {
                         username,
                         email,
                         bio.getText(),
-                        holding.getImage(),
+                        holding.getImage().getUrl(),
                         tagsResponse);
 
                 //Stay on the current page if the user couldn't sign up for any reason

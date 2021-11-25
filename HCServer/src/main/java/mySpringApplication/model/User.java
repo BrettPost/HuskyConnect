@@ -13,17 +13,19 @@ public class User {
     private String full_name;
     private String email;
     private String bio;
+    private byte[] imgBlob;
 
 
     public User() {
     }
 
-    public User(String username, String password, String full_name, String email, String bio) {
+    public User(String username, String password, String full_name, String email, String bio, byte[] imgBlob) {
         this.username = username;
         this.password = password;
         this.full_name = full_name;
         this.email = email;
         this.bio = bio;
+        this.imgBlob = imgBlob;
     }
 
     public String getUsername() {
@@ -70,5 +72,13 @@ public class User {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public byte[] getImgBlob() {
+        return imgBlob;
+    }
+
+    public void setImgBlob(byte[] imgBlob) {
+        this.imgBlob = imgBlob;
     }
 }
