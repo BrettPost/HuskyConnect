@@ -1,5 +1,6 @@
 package actors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import databaseconnections.HttpCon;
 import javafx.beans.binding.DoubleExpression;
@@ -29,15 +30,18 @@ import java.util.List;
 
 public class User {
     private String username;
-    private String email;
-    private String full_name;
-    private String bio;
+    private String email = "";
+    private String full_name = "";
+    private String bio = "";
+    @JsonIgnore
     private HashSet<String> tags;
 
-    private byte[] imgBlob;
+    private byte[] img_blob;
+    @JsonIgnore
     private Image img;//javafx representation of imgBlob. imgBlob is the ultimate truth for this duplicate information.
-
+    @JsonIgnore
     private List<User> connectedUsers;
+    @JsonIgnore
     private ProfilePage linkedPage;
 
     /**
@@ -54,14 +58,14 @@ public class User {
      * @param username the user's username
      * @param email the user's email
      * @param bio the user's bio
-     * @param imgBlob byte array of the img
+     * @param img_blob byte array of the img
      * @param tags the user's tags
      */
-    public User(String username, String email, String bio, byte[] imgBlob, String... tags) {
+    public User(String username, String email, String bio, byte[] img_blob, String... tags) {
         this.username = username;
         this.email = email;
         this.bio = bio;
-        this.imgBlob = imgBlob;
+        this.img_blob = img_blob;
 
         this.tags = new HashSet<>();
         this.tags.addAll(Arrays.asList(tags));
@@ -123,12 +127,12 @@ public class User {
     }
 
 
-    public byte[] getImgBlob() {
-        return imgBlob;
+    public byte[] getImg_blob() {
+        return img_blob;
     }
 
-    public void setImgBlob(byte[] imgBlob) {
-        this.imgBlob = imgBlob;
+    public void setImg_blob(byte[] img_blob) {
+        this.img_blob = img_blob;
     }
 
     public Image getImg() {
@@ -148,7 +152,7 @@ public class User {
             BufferedImage bImage = ImageIO.read(new File(new URI(filePath)));
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ImageIO.write(bImage,fileType,bos);
-            imgBlob = bos.toByteArray();
+            img_blob = bos.toByteArray();
 
             this.img = new Image(filePath);
         } catch (Exception e) {
@@ -243,7 +247,7 @@ public class User {
      */
     public Image generateImage(){
         try{
-            InputStream in = new ByteArrayInputStream(imgBlob);
+            InputStream in = new ByteArrayInputStream(img_blob);
             BufferedImage image = ImageIO.read(in);
             return SwingFXUtils.toFXImage(image,null);
         }catch (Exception e){

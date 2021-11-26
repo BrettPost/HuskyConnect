@@ -13,19 +13,19 @@ public class User {
     private String full_name;
     private String email;
     private String bio;
-    private byte[] imgBlob;
+    private byte[] img_blob;
 
 
     public User() {
     }
 
-    public User(String username, String password, String full_name, String email, String bio, byte[] imgBlob) {
+    public User(String username, String password, String full_name, String email, String bio, byte[] img_blob) {
         this.username = username;
         this.password = password;
         this.full_name = full_name;
         this.email = email;
         this.bio = bio;
-        this.imgBlob = imgBlob;
+        this.img_blob = img_blob;
     }
 
     public String getUsername() {
@@ -74,11 +74,11 @@ public class User {
         this.bio = bio;
     }
 
-    public byte[] getImgBlob() {
-        return imgBlob;
+    public byte[] getImg_blob() {
+        return img_blob;
     }
 
-    public void setImgBlob(byte[] imgBlob) {
-        this.imgBlob = imgBlob;
+    public void setImg_blob(byte[] imgBlob) {
+        this.img_blob = imgBlob;
     }
 }

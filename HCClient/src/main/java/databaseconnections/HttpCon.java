@@ -1,6 +1,10 @@
 package databaseconnections;
 
 import actors.User;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.*;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -14,6 +18,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.message.BasicStatusLine;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,15 +107,12 @@ public class HttpCon {
                 return false;
             }
 
-            //Convert parsed info into JSON
-            String JSON_STRING = "{\n" +
-                    "\"username\": \""+user.getUsername()+"\",\n" +
-                    "\"password\": \""+password+"\",\n" +
-                    "\"full_name\": \"john\",\n"+
-                    "\"email\": \""+user.getEmail()+"\",\n" +
-                    "\"bio\": \"john\"\n"+
-                    "\"imgBlob\": \""+ Arrays.toString(user.getImgBlob()) +"\",\n" +
-                    "}";
+            //converts user into json
+            ObjectMapper mapper = new ObjectMapper();
+            String JSON_STRING = mapper.writeValueAsString(user);
+            //adds password to the end of the json
+            JSON_STRING = JSON_STRING.substring(0,JSON_STRING.length() - 1) + ",\"password\": \""+password+"\"}";
+            System.out.println(JSON_STRING);
 
             StringEntity requestEntity = new StringEntity(JSON_STRING, ContentType.APPLICATION_JSON);
             request.setEntity(requestEntity);
