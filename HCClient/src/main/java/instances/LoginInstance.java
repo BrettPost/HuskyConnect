@@ -1,7 +1,7 @@
 package instances;
 
 import actors.User;
-import databaseconnections.HttpCon;
+import databaseconnections.HttpUser;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -40,7 +40,7 @@ public class LoginInstance {
     boolean login(String username, String password){
 
         try{
-            HttpResponse response = HttpCon.login(username,password);
+            HttpResponse response = HttpUser.login(username,password);
 
             //Tests to see if the status of the http was a success
             assert response != null;
@@ -167,7 +167,7 @@ public class LoginInstance {
 
         });
 
-        signUpButton.setOnAction(event -> gui.rootPane.setCenter(SignUpPage.createSignUpPageAccountDetail(gui, null, null)));
+        signUpButton.setOnAction(event -> gui.rootPane.setCenter(SignUpPage.createSignUpPageAccountDetail(gui, null, null,null)));
 
         return loginPage;
     }

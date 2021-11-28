@@ -3,6 +3,8 @@ package actors;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import databaseconnections.HttpCon;
+import databaseconnections.HttpTag;
+import databaseconnections.HttpUser;
 import javafx.beans.binding.DoubleExpression;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -48,8 +50,10 @@ public class User {
      * default constructor for jackson databind
      */
     public User(){
-        //TODO make this stuff populated from database
+
         this.tags = new HashSet<>();
+
+        //TODO make this populated from database
         this.connectedUsers = new ArrayList<>();
     }
 
@@ -83,9 +87,10 @@ public class User {
      * @param filePath path to a file for the img
      * @param tags the user's tags
      */
-    public User(String username, String email, String bio, String filePath, String... tags) {
+    public User(String username, String email, String full_name, String bio, String filePath, String... tags) {
         this.username = username;
         this.email = email;
+        this.full_name = full_name;
         this.bio = bio;
         setImg(filePath);
 
@@ -103,14 +108,19 @@ public class User {
      */
     public static User getUser(String username, Long token){
         try{
-            HttpResponse response = HttpCon.getUser(username,token);
+            HttpResponse response = HttpUser.getUser(username,token);
 
             //Tests to see if the status of the http was a success
             assert response != null;
             if(response.getStatusLine().getStatusCode() == 200){
                 //maps the response to a user
                 ObjectMapper mapper = new ObjectMapper();
-                return mapper.readValue(response.getEntity().getContent(), User.class);
+                User user = mapper.readValue(response.getEntity().getContent(), User.class);
+
+                //get tags for this user
+                user.addTags(HttpTag.getUserTags(username,token).strip().split(","));
+
+                return user;
             }else {
                 //TODO separate out the different possible errors to display what went wrong to the user
                 //Http failed in some way (could simply be invalid token or username)
