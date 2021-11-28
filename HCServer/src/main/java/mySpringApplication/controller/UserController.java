@@ -62,6 +62,7 @@ public class UserController {
      */
     @PostMapping("/")
     public ResponseEntity<?> add(@RequestBody User user) {
+        System.out.println(user.getUsername());
         if(userService.getUser(user.getUsername()) == null){
             userService.saveUser(user);
             return new ResponseEntity<>(HttpStatus.OK);
