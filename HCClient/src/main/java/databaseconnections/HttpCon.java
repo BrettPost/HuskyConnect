@@ -50,7 +50,7 @@ public class HttpCon {
 
             List<NameValuePair> params = new ArrayList<>(2);
             params.add(new BasicNameValuePair("username", username));
-            params.add(new BasicNameValuePair("password", password.hashCode()));
+            params.add(new BasicNameValuePair("password", Integer.toString(password.hashCode())));
 
             try {
                 request.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
