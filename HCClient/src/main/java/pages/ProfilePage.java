@@ -1,6 +1,8 @@
 package pages;
 
 import actors.User;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -90,6 +92,26 @@ public class ProfilePage {
         userFeed.minHeightProperty().bind(gui.rootPane.heightProperty().divide(4));
 
 
+        editButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                nameField.setEditable(true);
+                description.setEditable(true);
+                tags.setEditable(true);
+                Button saveButton = new Button("Save");
+                buttonBox.getChildren().add(saveButton);
+
+                saveButton.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        nameField.setEditable(false);
+                        description.setEditable(false);
+                        tags.setEditable(false);
+                        saveButton.setVisible(false);
+                    }
+                });
+            }
+        });
         return page;
     }
 
