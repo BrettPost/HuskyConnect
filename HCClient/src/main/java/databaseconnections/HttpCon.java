@@ -50,7 +50,7 @@ public class HttpCon {
 
             List<NameValuePair> params = new ArrayList<>(2);
             params.add(new BasicNameValuePair("username", username));
-            params.add(new BasicNameValuePair("password", password));
+            params.add(new BasicNameValuePair("password", Integer.toString(password.hashCode())));
 
             try {
                 request.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
@@ -104,7 +104,7 @@ public class HttpCon {
             //Convert parsed info into JSON
             String JSON_STRING = "{\n" +
                     "\"username\": \""+user.getUsername()+"\",\n" +
-                    "\"password\": \""+password+"\",\n" +
+                    "\"password\": \""+password.hashCode()+"\",\n" +
                     "\"full_name\": \"john\",\n"+
                     "\"email\": \""+user.getEmail()+"\",\n" +
                     "\"bio\": \"john\"\n"+
