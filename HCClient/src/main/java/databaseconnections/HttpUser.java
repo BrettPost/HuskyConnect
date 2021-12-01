@@ -35,7 +35,7 @@ public class HttpUser extends HttpCon{
 
             List<NameValuePair> params = new ArrayList<>(2);
             params.add(new BasicNameValuePair("username", username));
-            params.add(new BasicNameValuePair("password", password));
+            params.add(new BasicNameValuePair("password",Integer.toString(password.hashCode())));
 
             try {
                 request.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
@@ -90,7 +90,7 @@ public class HttpUser extends HttpCon{
             ObjectMapper mapper = new ObjectMapper();
             String JSON_STRING = mapper.writeValueAsString(user);
             //adds password to the end of the json
-            JSON_STRING = JSON_STRING.substring(0,JSON_STRING.length() - 1) + ",\"password\": \""+password+"\"}";
+            JSON_STRING = JSON_STRING.substring(0,JSON_STRING.length() - 1) + ",\"password\": \""+password.hashCode()+"\"}";
             System.out.println(JSON_STRING);
 
             StringEntity requestEntity = new StringEntity(JSON_STRING, ContentType.APPLICATION_JSON);
