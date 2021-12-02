@@ -13,10 +13,13 @@ public class HttpConTest extends TestCase {
 
     public void testLogin() {
 
-        HttpResponse test = HttpCon.login("demo", "demo");
-        assertEquals(test.getStatusLine().getStatusCode(), 200);
+        HttpResponse test1 = HttpCon.login("demo", "demo");
+        assertEquals(test1.getStatusLine().getStatusCode(), 200);   //correct username and password
+        HttpResponse test2 = HttpCon.login("demo", "demo1");
+        assertEquals(test2.getStatusLine().getStatusCode(), 401);   //incorrect username or password
     }
 
     public void testSaveUser() {
+
     }
 }
