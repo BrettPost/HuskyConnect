@@ -163,7 +163,7 @@ public class TopBar {
 
         //inbox icon
         profileBox.setOnMouseClicked( event -> {
-            ProfilePage profilePage = gui.loginInstance.loggedInUser.getLinkedPage();
+            ProfilePage profilePage = gui.loginInstance.loggedInUser.getLinkedPage(gui);
             gui.rootPane.setCenter(profilePage.generatePage());
         });
 

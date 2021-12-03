@@ -17,7 +17,7 @@ public class HomePage {
         // set the first 2 rows to take up the relevant amount of space and add them to the homepage
         for (int i = 0; i < 2; i++) {
             RowConstraints rowConst = new RowConstraints();
-            rowConst.setPercentHeight(100/8);
+            rowConst.setPercentHeight(100f/8f);
             rowConst.setValignment(VPos.BOTTOM);
             homePage.getRowConstraints().add(rowConst);
         }
@@ -36,7 +36,7 @@ public class HomePage {
         labelBox.setAlignment(Pos.CENTER);
 
         // retrieve the user's feed
-        VBox userFeed = guiInstance.loginInstance.loggedInUser.generateUserFeed();
+        VBox userFeed = guiInstance.loginInstance.loggedInUser.generateUserFeed(guiInstance);
 
         // add all three to the home page.
         // column 0, row 1 will set the welcome message to be 1/8 down the page
