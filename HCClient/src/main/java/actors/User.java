@@ -80,7 +80,7 @@ public class User {
 
     public Image getIcon() {
         if (icon == null || icon.isError()) {
-            icon = GUI.loadImageResource("\\src\\main\\resources\\default-user-icon.jpg");
+            icon = GUI.loadImageResource("\\src\\main\\resources\\default-user-icon.png");
         }
         return icon;
     }
