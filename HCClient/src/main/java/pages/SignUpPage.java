@@ -2,6 +2,8 @@ package pages;
 
 import actors.User;
 import databaseconnections.HttpCon;
+import databaseconnections.HttpTag;
+import databaseconnections.HttpUser;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -24,7 +26,7 @@ import java.util.Arrays;
 import static pages.HomePage.loadHomePage;
 
 public class SignUpPage {
-    public static VBox createSignUpPageAccountDetail(GUI gui, String usernameFill, String emailFill) {
+    public static VBox createSignUpPageAccountDetail(GUI gui, String usernameFill, String emailFill, String full_nameFill) {
         VBox signUpPage = new VBox();
 
         ImageView logo = new ImageView(
@@ -44,6 +46,16 @@ public class SignUpPage {
 
         }
         VBox emailBox = new VBox(emailText, email);
+
+        TextField full_name;
+        if (full_nameFill != null) {
+            full_name = new TextField(full_nameFill);
+        } else {
+            full_name = new TextField();
+            full_name.setPromptText("full name");
+        }
+        Label full_nameText = new Label("Full Name");
+        VBox full_nameBox = new VBox(full_nameText, full_name);
 
         TextField username;
         if (usernameFill != null) {
@@ -65,7 +77,7 @@ public class SignUpPage {
         passwordConfirm.setPromptText("confirm password");
         VBox confirmBox = new VBox(confirmText, passwordConfirm);
 
-        VBox fieldContainers = new VBox(emailBox, usernameBox, passwordBox, confirmBox);
+        VBox fieldContainers = new VBox(emailBox, usernameBox,full_nameBox, passwordBox, confirmBox);
 
         Button back = new Button ("Back");
         Button next = new Button("Next");
@@ -91,14 +103,14 @@ public class SignUpPage {
         imageBox.maxWidthProperty().bind(logo.fitWidthProperty());
 
         // BUTTON FUNCTIONALITY
-        next.setOnAction(event -> gui.rootPane.setCenter(createSignUpPageProfileDetail(gui, username.getText(), email.getText(), password)));
+        next.setOnAction(event -> gui.rootPane.setCenter(createSignUpPageProfileDetail(gui, username.getText(), email.getText(), full_name.getText(), password)));
 
         back.setOnAction(event -> gui.rootPane.setCenter(gui.loginInstance.createLoginPage()));
         return signUpPage;
     }
 
 
-    private static HBox createSignUpPageProfileDetail(GUI gui, String username, String email, PasswordField password) {
+    private static HBox createSignUpPageProfileDetail(GUI gui, String username, String email, String full_name, PasswordField password) {
         HBox profileDetails = new HBox();
 
         Image userIcon = GUI.loadImageResource("\\src\\main\\resources\\upload-user-icon.png");
@@ -170,7 +182,7 @@ public class SignUpPage {
             // create a file selection dialog.
             // (This is a swing element, because the JavaFX one doesn't fit the needs of the UI)
             JFileChooser fileChooser = new JFileChooser();
-            Image error = GUI.loadImageResource("\\src\\main\\resources\\error-user-icon.png");
+            Image error = GUI.loadImageResource("src\\main\\resources\\error-user-icon.png");
             // if the file chooser correctly opens
             if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile(); // retrieve the user selected file
@@ -194,28 +206,34 @@ public class SignUpPage {
         back.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                gui.rootPane.setCenter(createSignUpPageAccountDetail(gui, username, email));
+                gui.rootPane.setCenter(createSignUpPageAccountDetail(gui, username, full_name, email));
             }
         });
         signUp.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                //TODO
 
                 String[] tagsResponse = tags.getText().split(",");
                 Arrays.stream(tagsResponse).forEach(e -> e.strip());
-                System.out.println(holding.getImage().getUrl());
+
                 User newUser = new User(
                         username,
                         email,
+                        full_name,
                         bio.getText(),
-                        holding.getImage(),
+                        holding.getImage().getUrl(),
                         tagsResponse);
 
                 //Stay on the current page if the user couldn't sign up for any reason
-                if(HttpCon.saveUser(newUser, password.getText())) {
+                if(HttpUser.saveUser(newUser, password.getText())) {
                     gui.loginInstance.loggedInUser = newUser;
                     gui.rootPane.setCenter(loadHomePage(gui));
+                }
+
+                //saves the tags for the user
+                Long token = Long.parseLong( HttpCon.readResponse( HttpUser.login(username,password.getText()) ).strip() );
+                for (String tag : tagsResponse) {
+                    HttpTag.saveUserTag(tag,token);
                 }
             }
         });
