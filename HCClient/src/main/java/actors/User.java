@@ -18,6 +18,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import org.apache.http.HttpResponse;
+import pages.NotificationPage;
 import pages.ProfilePage;
 import userinterface.GUI;
 
@@ -40,11 +41,13 @@ public class User {
 
     private byte[] img_blob;
     @JsonIgnore
-    private Image img;//javafx representation of imgBlob. imgBlob is the ultimate truth for this duplicate information.
+    public Image img;//javafx representation of imgBlob. imgBlob is the ultimate truth for this duplicate information.
     @JsonIgnore
     private List<User> connectedUsers;
     @JsonIgnore
     private ProfilePage linkedPage;
+    @JsonIgnore
+    public List<BorderPane> notifications;
 
     /**
      * default constructor for jackson databind
@@ -55,6 +58,8 @@ public class User {
 
         //TODO make this populated from database
         this.connectedUsers = new ArrayList<>();
+
+        this.notifications = new ArrayList<>();
     }
 
     /**
@@ -75,6 +80,7 @@ public class User {
         this.tags.addAll(Arrays.asList(tags));
 
         this.connectedUsers = new ArrayList<>();
+        this.notifications = new ArrayList<>();
 
         generateImage();
     }
@@ -266,13 +272,16 @@ public class User {
      */
     public Image generateImage(){
         try{
+            System.out.println(img_blob);
             InputStream in = new ByteArrayInputStream(img_blob);
             BufferedImage image = ImageIO.read(in);
             return SwingFXUtils.toFXImage(image,null);
         }catch (Exception e){
-            //TODO handle this with a img not found image
             e.printStackTrace();
-            return null;
+            if (username == "Husky Connect") {
+                return GUI.loadImageResource("\\src\\main\\resources\\husky-connect-user-img.jpg");
+            }
+            return GUI.loadImageResource("\\src\\main\\resources\\error-user-icon.png");
         }
     }
 
@@ -294,25 +303,60 @@ public class User {
         HBox area = new HBox(name);
         area.setAlignment(Pos.CENTER);
         Button profile = new Button("Profile");
+        Button connect = new Button("Connect");
+        VBox twoButtons = new VBox(profile, connect);
+
+        if (connectedUsers.contains(gui.loginInstance.loggedInUser)) {
+            connect.setText("Disconnect");
+        }
 
         card.setLeft(imageBox);
-        card.setRight(profile);
+        card.setRight(twoButtons);
         card.setCenter(area);
 
         //styling
-        logoCircle.radiusProperty().bind(gui.rootPane.heightProperty().divide(18));
-        profile.prefHeightProperty().bind(card.heightProperty());
-        profile.prefWidthProperty().bind(card.widthProperty().divide(6));
 
         DoubleExpression userWidthBaseBind = gui.rootPane.widthProperty().divide(2);
 
+
+        logoCircle.radiusProperty().bind(gui.rootPane.heightProperty().divide(18));
+
         card.prefWidthProperty().bind(userWidthBaseBind);
         card.prefHeightProperty().bind(gui.rootPane.heightProperty().divide(9));
+
+        twoButtons.prefHeightProperty().bind(card.heightProperty());
+        twoButtons.prefWidthProperty().bind(card.widthProperty().divide(6));
+        connect.prefHeightProperty().bind(twoButtons.heightProperty().divide(2));
+        profile.prefHeightProperty().bind(twoButtons.heightProperty().divide(2));
+        connect.prefWidthProperty().bind(twoButtons.widthProperty());
+        profile.prefWidthProperty().bind(twoButtons.widthProperty());
+
+
 
         profile.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 gui.rootPane.setCenter(getLinkedPage(gui).generatePage());
+            }
+        });
+
+        connect.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                User loggedInUser = gui.loginInstance.loggedInUser;
+                if (connect.getText().equalsIgnoreCase("connect")) {
+                    loggedInUser.notifications.add(
+                        NotificationPage.generateNotification(
+                            loggedInUser,
+                            userInst,
+                            gui
+                    ));
+                    connect.setText("Sent!");
+                } else if (connect.getText().equalsIgnoreCase("disconnect")){
+                    userInst.connectedUsers.remove(loggedInUser);
+                    loggedInUser.connectedUsers.remove(userInst);
+                    connect.setText("Connect");
+                }
             }
         });
         return card;
@@ -338,7 +382,7 @@ public class User {
         scrollPane.fitToWidthProperty().setValue(true);
 
         //TODO remove this, as self shouldn be in user feed, its for testing]
-        userList.getChildren().add(this.generateCard(gui));
+        userList.getChildren().add(gui.huskyConnectAcc.generateCard(gui));
 
         // add the user feed and scroll pane to the feed
         feed.getChildren().addAll(userFeed, scrollPane);
