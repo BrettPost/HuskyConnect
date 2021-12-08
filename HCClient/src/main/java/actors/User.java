@@ -40,7 +40,7 @@ public class User {
 
     private byte[] img_blob;
     @JsonIgnore
-    private Image img;//javafx representation of imgBlob. imgBlob is the ultimate truth for this duplicate information.
+    public Image img;//javafx representation of imgBlob. imgBlob is the ultimate truth for this duplicate information.
     @JsonIgnore
     private List<User> connectedUsers;
     @JsonIgnore
@@ -257,6 +257,7 @@ public class User {
      */
     public Image generateImage(){
         try{
+            System.out.println(img_blob);
             InputStream in = new ByteArrayInputStream(img_blob);
             BufferedImage image = ImageIO.read(in);
             return SwingFXUtils.toFXImage(image,null);

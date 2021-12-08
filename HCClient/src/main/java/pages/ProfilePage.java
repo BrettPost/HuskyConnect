@@ -1,6 +1,8 @@
 package pages;
 
 import actors.User;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -57,7 +59,11 @@ public class ProfilePage {
 
 
         Button editButton = new Button("Edit");
-        VBox buttonBox = new VBox(editButton);
+        Button saveButton = new Button("Save");
+
+        saveButton.setVisible(false);
+
+        VBox buttonBox = new VBox(editButton, saveButton);
         VBox logoBox = new VBox(icon, buttonBox);
         buttonBox.setAlignment(Pos.CENTER);
         logoBox.setSpacing(GUI.DEFAULT_SPACING);
@@ -80,6 +86,7 @@ public class ProfilePage {
         // set the spacing for the required panes to default
         page.setSpacing(GUI.DEFAULT_SPACING);
         textFieldsBox.setSpacing(GUI.DEFAULT_SPACING);
+        buttonBox.setSpacing(GUI.DEFAULT_SPACING);
 
         // allocate the correct amount of room to the panes
         page.maxWidthProperty().bind(gui.rootPane.widthProperty());
@@ -87,7 +94,6 @@ public class ProfilePage {
 
         page.setAlignment(Pos.CENTER);
         textFieldsBox.setAlignment(Pos.CENTER);
-
 
         textFieldsBox.prefWidthProperty().bind(page.widthProperty().divide(3));
         logoBox.prefWidthProperty().bind(page.widthProperty().divide(6));
@@ -97,6 +103,27 @@ public class ProfilePage {
 
         userFeed.minHeightProperty().bind(gui.rootPane.heightProperty().divide(4));
 
+        if (gui.loginInstance.loggedInUser != linkedUser) {
+            editButton.setVisible(false);
+        }
+
+        editButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                saveButton.setVisible(true);
+                tags.setEditable(true);
+                description.setEditable(true);
+            }
+        });
+
+        saveButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                saveButton.setVisible(false);
+                tags.setEditable(false);
+                description.setEditable(false);
+            }
+        });
 
         return page;
     }
