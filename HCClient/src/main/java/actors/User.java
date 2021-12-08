@@ -300,6 +300,8 @@ public class User {
 
         Label name = GUI.scaleableText(username, gui.rootPane.heightProperty(), card.widthProperty(), 25.);
 
+        User userInst = this;
+
         HBox area = new HBox(name);
         area.setAlignment(Pos.CENTER);
         Button profile = new Button("Profile");
