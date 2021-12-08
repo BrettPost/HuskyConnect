@@ -1,6 +1,8 @@
 package pages;
 
 
+import actors.User;
+import databaseconnections.HttpUser;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -154,8 +156,17 @@ public class TopBar {
         });
         //search button
         searchButton.setOnAction( event -> {
-            //TODO: Go To Search Page
-            System.out.println("Search Button Clicked");
+
+            User[] users = HttpUser.getUsers();
+            if(users != null)
+                for (User user :
+                        users) {
+                    if(user.getUsername().equals(search.getText().strip())){
+                        ProfilePage profilePage = user.getLinkedPage(gui);
+                        gui.rootPane.setCenter(profilePage.generatePage());
+                    }
+                }
+
         });
 
         //inbox icon
