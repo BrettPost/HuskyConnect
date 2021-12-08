@@ -251,6 +251,15 @@ public class User {
         connectedUsers.add(connection);
     }
 
+
+    public ProfilePage getLinkedPage(GUI gui) {
+        if (linkedPage == null) {
+            linkedPage = new ProfilePage(this, gui);
+        }
+        return linkedPage;
+    }
+
+
     /**
      * Reads the blob into a javafx image
      * @return javafx image from the imgBlob
@@ -282,8 +291,6 @@ public class User {
 
         Label name = GUI.scaleableText(username, gui.rootPane.heightProperty(), card.widthProperty(), 25.);
 
-        User userInst = this;
-
         HBox area = new HBox(name);
         area.setAlignment(Pos.CENTER);
         Button profile = new Button("Profile");
@@ -305,11 +312,7 @@ public class User {
         profile.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if (linkedPage == null) {
-                    linkedPage = new ProfilePage(userInst, gui);
-                }
-
-                gui.rootPane.setCenter(linkedPage.generatePage());
+                gui.rootPane.setCenter(getLinkedPage(gui).generatePage());
             }
         });
         return card;

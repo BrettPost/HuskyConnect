@@ -12,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.apache.http.HttpResponse;
 import pages.SignUpPage;
+import pages.TopBar;
 import userinterface.GUI;
 
 import java.io.BufferedReader;
@@ -31,6 +32,11 @@ public class LoginInstance {
         this.gui = gui;
     }
 
+
+    public void setLoggedInUser(User user) {
+        loggedInUser = user;
+        gui.rootPane.setTop(TopBar.createTopBar(gui));
+    }
     /**
      * attempts to login, and store the token in this class
      * @param username username of user
@@ -153,8 +159,8 @@ public class LoginInstance {
                 System.out.println("invalid username/password");
             }
             else {
+                setLoggedInUser(User.getUser(usernameStr,token));
 
-                loggedInUser = User.getUser(usernameStr,token);
                 if(loggedInUser == null){
                     new Exception("failed to get logged in user").printStackTrace();
                 }else{
