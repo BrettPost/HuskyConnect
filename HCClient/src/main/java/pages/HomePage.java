@@ -28,7 +28,7 @@ public class HomePage {
         ccConst.setHalignment(HPos.CENTER);
         homePage.getColumnConstraints().add(ccConst);
 
-        // get the username of thel ogged in user and construct the welcome label to scale
+        // get the username of the logged in user and construct the welcome label to scale
         String user = guiInstance.loginInstance.loggedInUser.getUsername(); // retrieve this information from the database when the database is live
         Label welcomeLabel = GUI.scaleableText("Welcome to HuskyConnect, " + user, homePage.widthProperty(), homePage.heightProperty(), 50.);
         // place it in a box

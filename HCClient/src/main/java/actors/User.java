@@ -40,11 +40,13 @@ public class User {
 
     private byte[] img_blob;
     @JsonIgnore
-    public Image img;//javafx representation of imgBlob. imgBlob is the ultimate truth for this duplicate information.
+    private Image img;//javafx representation of imgBlob. imgBlob is the ultimate truth for this duplicate information.
     @JsonIgnore
     private List<User> connectedUsers;
     @JsonIgnore
     private ProfilePage linkedPage;
+    @JsonIgnore
+    public List<BorderPane> notifications;
 
     /**
      * default constructor for jackson databind
@@ -55,6 +57,8 @@ public class User {
 
         //TODO make this populated from database
         this.connectedUsers = new ArrayList<>();
+
+        this.notifications = new ArrayList<>();
     }
 
     /**
@@ -75,6 +79,7 @@ public class User {
         this.tags.addAll(Arrays.asList(tags));
 
         this.connectedUsers = new ArrayList<>();
+        this.notifications = new ArrayList<>();
 
         generateImage();
     }

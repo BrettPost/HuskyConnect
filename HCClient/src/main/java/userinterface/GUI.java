@@ -20,7 +20,6 @@ public class GUI extends Application {
     public BorderPane rootPane;
 
     public LoginInstance loginInstance = null;
-
     public static final int DEFAULT_SPACING = 10;
 
     public static void start() {

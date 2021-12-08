@@ -59,11 +59,12 @@ public class ProfilePage {
 
 
         Button editButton = new Button("Edit");
+        Button notif = new Button("Notifications");
         Button saveButton = new Button("Save");
 
         saveButton.setVisible(false);
 
-        VBox buttonBox = new VBox(editButton, saveButton);
+        VBox buttonBox = new VBox(editButton, saveButton, notif);
         VBox logoBox = new VBox(icon, buttonBox);
         buttonBox.setAlignment(Pos.CENTER);
         logoBox.setSpacing(GUI.DEFAULT_SPACING);
@@ -125,6 +126,12 @@ public class ProfilePage {
             }
         });
 
+        notif.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                gui.rootPane.setCenter(NotificationPage.NotificationPage(gui));
+            }
+        });
         return page;
     }
 
