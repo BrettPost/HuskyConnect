@@ -1,8 +1,12 @@
 package actors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import databaseconnections.HttpCon;
+import databaseconnections.HttpTag;
+import databaseconnections.HttpUser;
 import javafx.beans.binding.DoubleExpression;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -17,6 +21,10 @@ import org.apache.http.HttpResponse;
 import pages.ProfilePage;
 import userinterface.GUI;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,20 +32,28 @@ import java.util.List;
 
 public class User {
     private String username;
-    private String email;
-    private String full_name;
-    private String bio;
+    private String email = "";
+    private String full_name = "";
+    private String bio = "";
+    @JsonIgnore
     private HashSet<String> tags;
-    private Image icon;
+
+    private byte[] img_blob;
+    @JsonIgnore
+    private Image img;//javafx representation of imgBlob. imgBlob is the ultimate truth for this duplicate information.
+    @JsonIgnore
     private List<User> connectedUsers;
+    @JsonIgnore
     private ProfilePage linkedPage;
 
     /**
      * default constructor for jackson databind
      */
     public User(){
-        //TODO make this stuff populated from database
+
         this.tags = new HashSet<>();
+
+        //TODO make this populated from database
         this.connectedUsers = new ArrayList<>();
     }
 
@@ -46,13 +62,37 @@ public class User {
      * @param username the user's username
      * @param email the user's email
      * @param bio the user's bio
+     * @param img_blob byte array of the img
      * @param tags the user's tags
      */
-    public User(String username, String email, String bio, Image icon, String... tags) {
+    public User(String username, String email, String bio, byte[] img_blob, String... tags) {
         this.username = username;
         this.email = email;
         this.bio = bio;
-        this.icon = icon;
+        this.img_blob = img_blob;
+
+        this.tags = new HashSet<>();
+        this.tags.addAll(Arrays.asList(tags));
+
+        this.connectedUsers = new ArrayList<>();
+
+        generateImage();
+    }
+
+    /**
+     * Create a user object
+     * @param username the user's username
+     * @param email the user's email
+     * @param bio the user's bio
+     * @param filePath path to a file for the img
+     * @param tags the user's tags
+     */
+    public User(String username, String email, String full_name, String bio, String filePath, String... tags) {
+        this.username = username;
+        this.email = email;
+        this.full_name = full_name;
+        this.bio = bio;
+        setImg(filePath);
 
         this.tags = new HashSet<>();
         this.tags.addAll(Arrays.asList(tags));
@@ -68,14 +108,19 @@ public class User {
      */
     public static User getUser(String username, Long token){
         try{
-            HttpResponse response = HttpCon.getUser(username,token);
+            HttpResponse response = HttpUser.getUser(username,token);
 
             //Tests to see if the status of the http was a success
             assert response != null;
             if(response.getStatusLine().getStatusCode() == 200){
                 //maps the response to a user
                 ObjectMapper mapper = new ObjectMapper();
-                return mapper.readValue(response.getEntity().getContent(), User.class);
+                User user = mapper.readValue(response.getEntity().getContent(), User.class);
+
+                //get tags for this user
+                user.addTags(HttpTag.getUserTags(username,token).strip().split(","));
+
+                return user;
             }else {
                 //TODO separate out the different possible errors to display what went wrong to the user
                 //Http failed in some way (could simply be invalid token or username)
@@ -88,6 +133,43 @@ public class User {
             e.printStackTrace();
             return null;
         }
+
+    }
+
+
+    public byte[] getImg_blob() {
+        return img_blob;
+    }
+
+    public void setImg_blob(byte[] img_blob) {
+        this.img_blob = img_blob;
+    }
+
+    public Image getImg() {
+        if(img == null){
+            img = generateImage();
+        }
+        return img;
+    }
+
+    /**
+     * sets imgBlob and img from a file
+     * @param filePath path to the file for the img
+     */
+    public void setImg(String filePath) {
+        try {
+            String fileType = filePath.substring(filePath.indexOf(".")+1);
+            BufferedImage bImage = ImageIO.read(new File(new URI(filePath)));
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ImageIO.write(bImage,fileType,bos);
+            img_blob = bos.toByteArray();
+
+            this.img = new Image(filePath);
+        } catch (Exception e) {
+            //TODO set image to a fallback image if this failed
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -113,17 +195,6 @@ public class User {
 
     public void setBio(String bio) {
         this.bio = bio;
-    }
-
-    public Image getIcon() {
-        if (icon == null || icon.isError()) {
-            icon = GUI.loadImageResource("\\src\\main\\resources\\default-user-icon.png");
-        }
-        return icon;
-    }
-
-    public void setIcon(Image icon) {
-        this.icon = icon;
     }
 
     public HashSet<String> getTags() {
@@ -190,17 +261,31 @@ public class User {
 
 
     /**
+     * Reads the blob into a javafx image
+     * @return javafx image from the imgBlob
+     */
+    public Image generateImage(){
+        try{
+            InputStream in = new ByteArrayInputStream(img_blob);
+            BufferedImage image = ImageIO.read(in);
+            return SwingFXUtils.toFXImage(image,null);
+        }catch (Exception e){
+            //TODO handle this with a img not found image
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
      * generates a card for this users profile
      * @param gui the gui this card will be added to
      * @return the card created
      */
     public BorderPane generateCard(GUI gui) {
         BorderPane card = new BorderPane();
-        Circle logoCircle = new Circle(1, 1, 1);
-        if (icon == null || icon.isError())
-            icon = GUI.loadImageResource("\\src\\main\\resources\\default-user-icon.png");
 
-        logoCircle.setFill(new ImagePattern(icon));
+        Circle logoCircle = new Circle(1, 1, 1);
+        logoCircle.setFill(new ImagePattern(generateImage()));
 
         VBox imageBox = new VBox(logoCircle);
 

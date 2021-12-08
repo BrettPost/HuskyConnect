@@ -5,9 +5,8 @@ plugins {
 
 javafx {
     version = "11"
-    modules = ['javafx.graphics', 'javafx.controls']
+    modules = ['javafx.graphics', 'javafx.controls','javafx.swing']
 }
-
 group 'org.example'
 version '1.0-SNAPSHOT'
 
