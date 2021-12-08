@@ -65,16 +65,9 @@ public class HttpCon {
                 builder.append(System.lineSeparator());
             }
 
-jacob-testing
-            return client.execute(request);
-        } catch (Exception e) {
-            //e.printStackTrace();
-            return new DefaultHttpResponseFactory().newHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_NOT_FOUND, null), null);
-
             return builder.toString();
         }catch (Exception e){
             return null;
- dev
         }
 
     }
