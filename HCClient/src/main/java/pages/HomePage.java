@@ -17,7 +17,7 @@ public class HomePage {
         // set the first 2 rows to take up the relevant amount of space and add them to the homepage
         for (int i = 0; i < 2; i++) {
             RowConstraints rowConst = new RowConstraints();
-            rowConst.setPercentHeight(100/8);
+            rowConst.setPercentHeight(100f/8f);
             rowConst.setValignment(VPos.BOTTOM);
             homePage.getRowConstraints().add(rowConst);
         }
@@ -28,7 +28,7 @@ public class HomePage {
         ccConst.setHalignment(HPos.CENTER);
         homePage.getColumnConstraints().add(ccConst);
 
-        // get the username of thel ogged in user and construct the welcome label to scale
+        // get the username of the logged in user and construct the welcome label to scale
         String user = guiInstance.loginInstance.loggedInUser.getUsername(); // retrieve this information from the database when the database is live
         Label welcomeLabel = GUI.scaleableText("Welcome to HuskyConnect, " + user, homePage.widthProperty(), homePage.heightProperty(), 50.);
         // place it in a box
@@ -36,9 +36,9 @@ public class HomePage {
         labelBox.setAlignment(Pos.CENTER);
 
         // retrieve the user's feed
-        VBox userFeed = guiInstance.loginInstance.loggedInUser.generateUserFeed();
+        VBox userFeed = guiInstance.loginInstance.loggedInUser.generateUserFeed(guiInstance);
 
-        // add both to the home page.
+        // add all three to the home page.
         // column 0, row 1 will set the welcome message to be 1/8 down the page
         homePage.add(labelBox, 0, 1);
         // column 0, row 2 will set the user feed to be 1/4 down the page

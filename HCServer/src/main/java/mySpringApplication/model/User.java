@@ -13,17 +13,19 @@ public class User {
     private String full_name;
     private String email;
     private String bio;
+    private byte[] img_blob;
 
 
     public User() {
     }
 
-    public User(String username, String password, String full_name, String email, String bio) {
+    public User(String username, String password, String full_name, String email, String bio, byte[] img_blob) {
         this.username = username;
         this.password = password;
         this.full_name = full_name;
         this.email = email;
         this.bio = bio;
+        this.img_blob = img_blob;
     }
 
     public String getUsername() {
@@ -34,8 +36,14 @@ public class User {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    /**
+     * tests if a password is the same as this users password
+     * @param password password being tested
+     * @return if the password is the same
+     */
+    public boolean passwordEquals(String password) {
+
+        return this.password.equals(password);
     }
 
     public void setPassword(String password) {
@@ -64,5 +72,13 @@ public class User {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public byte[] getImg_blob() {
+        return img_blob;
+    }
+
+    public void setImg_blob(byte[] imgBlob) {
+        this.img_blob = imgBlob;
     }
 }

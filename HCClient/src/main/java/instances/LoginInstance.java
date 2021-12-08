@@ -1,7 +1,7 @@
 package instances;
 
 import actors.User;
-import databaseconnections.HttpCon;
+import databaseconnections.HttpUser;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -12,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.apache.http.HttpResponse;
 import pages.SignUpPage;
+import pages.TopBar;
 import userinterface.GUI;
 
 import java.io.BufferedReader;
@@ -31,6 +32,11 @@ public class LoginInstance {
         this.gui = gui;
     }
 
+
+    public void setLoggedInUser(User user) {
+        loggedInUser = user;
+        gui.rootPane.setTop(TopBar.createTopBar(gui));
+    }
     /**
      * attempts to login, and store the token in this class
      * @param username username of user
@@ -40,7 +46,7 @@ public class LoginInstance {
     boolean login(String username, String password){
 
         try{
-            HttpResponse response = HttpCon.login(username,password);
+            HttpResponse response = HttpUser.login(username,password);
 
             //Tests to see if the status of the http was a success
             assert response != null;
@@ -153,22 +159,21 @@ public class LoginInstance {
                 System.out.println("invalid username/password");
             }
             else {
-                // TODO: remove this temporary home page populating
-                loggedInUser = new User("testUser", "test@testuser.com", "I like to test things :)", loadImageResource("default-user-icon.png"), gui, "testing", "making things work!");
-                loggedInUser.addConnection(new User("a", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
-                loggedInUser.addConnection(new User("b", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
-                loggedInUser.addConnection(new User("c", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
-                loggedInUser.addConnection(new User("d", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
-                loggedInUser.addConnection(new User("e", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
-                loggedInUser.addConnection(new User("f", "b@gmail.com", "cdefghi", null, gui, "#j", "#k", "#l"));
+                setLoggedInUser(User.getUser(usernameStr,token));
+
+                if(loggedInUser == null){
+                    new Exception("failed to get logged in user").printStackTrace();
+                }else{
+                    System.out.println("Successful Login!");
+                }
 
                 gui.rootPane.setCenter(loadHomePage(gui));
-                System.out.println("Successful Login!");
+
             }
 
         });
 
-        signUpButton.setOnAction(event -> gui.rootPane.setCenter(SignUpPage.createSignUpPageAccountDetail(gui, null, null)));
+        signUpButton.setOnAction(event -> gui.rootPane.setCenter(SignUpPage.createSignUpPageAccountDetail(gui, null, null,null)));
 
         return loginPage;
     }

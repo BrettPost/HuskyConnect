@@ -1,6 +1,12 @@
 package actors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import databaseconnections.HttpCon;
+import databaseconnections.HttpTag;
+import databaseconnections.HttpUser;
 import javafx.beans.binding.DoubleExpression;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -8,13 +14,18 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
+import org.apache.http.HttpResponse;
+import pages.NotificationPage;
 import pages.ProfilePage;
 import userinterface.GUI;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -22,37 +33,151 @@ import java.util.List;
 
 public class User {
     private String username;
-    private String email;
-    private String bio;
-    private GUI gui;
+    private String email = "";
+    private String full_name = "";
+    private String bio = "";
+    @JsonIgnore
     private HashSet<String> tags;
-    private Image icon;
+
+    private byte[] img_blob;
+    @JsonIgnore
+    public Image img;//javafx representation of imgBlob. imgBlob is the ultimate truth for this duplicate information.
+    @JsonIgnore
     private List<User> connectedUsers;
+    @JsonIgnore
     private ProfilePage linkedPage;
+    @JsonIgnore
+    public List<BorderPane> notifications;
+
+    /**
+     * default constructor for jackson databind
+     */
+    public User(){
+
+        this.tags = new HashSet<>();
+
+        //TODO make this populated from database
+        this.connectedUsers = new ArrayList<>();
+
+        this.notifications = new ArrayList<>();
+    }
 
     /**
      * Create a user object
      * @param username the user's username
      * @param email the user's email
      * @param bio the user's bio
+     * @param img_blob byte array of the img
      * @param tags the user's tags
      */
-    public User(String username, String email, String bio, Image icon, GUI gui, String... tags) {
+    public User(String username, String email, String bio, byte[] img_blob, String... tags) {
         this.username = username;
         this.email = email;
         this.bio = bio;
-        this.icon = icon;
-        this.gui = gui;
+        this.img_blob = img_blob;
 
         this.tags = new HashSet<>();
         this.tags.addAll(Arrays.asList(tags));
 
         this.connectedUsers = new ArrayList<>();
-        if (!username.equals("HuskyConnect")) {
-            connectedUsers.add(GUI.huskyConnectUser);
-        }
+        this.notifications = new ArrayList<>();
+
+        generateImage();
     }
 
+    /**
+     * Create a user object
+     * @param username the user's username
+     * @param email the user's email
+     * @param bio the user's bio
+     * @param filePath path to a file for the img
+     * @param tags the user's tags
+     */
+    public User(String username, String email, String full_name, String bio, String filePath, String... tags) {
+        this.username = username;
+        this.email = email;
+        this.full_name = full_name;
+        this.bio = bio;
+        setImg(filePath);
+
+        this.tags = new HashSet<>();
+        this.tags.addAll(Arrays.asList(tags));
+
+        this.connectedUsers = new ArrayList<>();
+    }
+
+    /**
+     * makes a user by pulling information from the database
+     * @param username username of user being grabbed
+     * @param token authentication proof
+     * @return user of the username provided. Returns null if http failed to get the user for any reason
+     */
+    public static User getUser(String username, Long token){
+        try{
+            HttpResponse response = HttpUser.getUser(username,token);
+
+            //Tests to see if the status of the http was a success
+            assert response != null;
+            if(response.getStatusLine().getStatusCode() == 200){
+                //maps the response to a user
+                ObjectMapper mapper = new ObjectMapper();
+                User user = mapper.readValue(response.getEntity().getContent(), User.class);
+
+                //get tags for this user
+                user.addTags(HttpTag.getUserTags(username,token).strip().split(","));
+
+                return user;
+            }else {
+                //TODO separate out the different possible errors to display what went wrong to the user
+                //Http failed in some way (could simply be invalid token or username)
+                System.out.println("failed to get user from database");
+                System.out.println(response.getStatusLine());
+                return null;
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+
+    public byte[] getImg_blob() {
+        return img_blob;
+    }
+
+    public void setImg_blob(byte[] img_blob) {
+        this.img_blob = img_blob;
+    }
+
+    public Image getImg() {
+        if(img == null){
+            img = generateImage();
+        }
+        return img;
+    }
+
+    /**
+     * sets imgBlob and img from a file
+     * @param filePath path to the file for the img
+     */
+    public void setImg(String filePath) {
+        try {
+            String fileType = filePath.substring(filePath.indexOf(".")+1);
+            BufferedImage bImage = ImageIO.read(new File(new URI(filePath)));
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ImageIO.write(bImage,fileType,bos);
+            img_blob = bos.toByteArray();
+
+            this.img = new Image(filePath);
+        } catch (Exception e) {
+            //TODO set image to a fallback image if this failed
+            e.printStackTrace();
+        }
+
+
+    }
 
     public String getUsername() {
         return username;
@@ -78,16 +203,16 @@ public class User {
         this.bio = bio;
     }
 
-    public Image getIcon() {
-        return icon;
-    }
-
-    public void setIcon(Image icon) {
-        this.icon = icon;
-    }
-
     public HashSet<String> getTags() {
         return tags;
+    }
+
+    public String getFull_name() {
+        return full_name;
+    }
+
+    public void setFull_name(String full_name) {
+        this.full_name = full_name;
     }
 
     /**
@@ -132,53 +257,118 @@ public class User {
         connectedUsers.add(connection);
     }
 
-    public BorderPane generateCard() {
-        BorderPane card = new BorderPane();
-        Circle logoCircle = new Circle(1, 1, 1);
-        if (icon == null || icon.isError())
-            icon = GUI.loadImageResource("\\src\\main\\resources\\default-user-icon.png");
 
-        logoCircle.setFill(new ImagePattern(icon));
+    public ProfilePage getLinkedPage(GUI gui) {
+        if (linkedPage == null) {
+            linkedPage = new ProfilePage(this, gui);
+        }
+        return linkedPage;
+    }
+
+
+    /**
+     * Reads the blob into a javafx image
+     * @return javafx image from the imgBlob
+     */
+    public Image generateImage(){
+        try{
+            System.out.println(img_blob);
+            InputStream in = new ByteArrayInputStream(img_blob);
+            BufferedImage image = ImageIO.read(in);
+            return SwingFXUtils.toFXImage(image,null);
+        }catch (Exception e){
+            e.printStackTrace();
+            if (username == "Husky Connect") {
+                return GUI.loadImageResource("\\src\\main\\resources\\husky-connect-user-img.jpg");
+            }
+            return GUI.loadImageResource("\\src\\main\\resources\\error-user-icon.png");
+        }
+    }
+
+    /**
+     * generates a card for this users profile
+     * @param gui the gui this card will be added to
+     * @return the card created
+     */
+    public BorderPane generateCard(GUI gui) {
+        BorderPane card = new BorderPane();
+
+        Circle logoCircle = new Circle(1, 1, 1);
+        logoCircle.setFill(new ImagePattern(generateImage()));
 
         VBox imageBox = new VBox(logoCircle);
 
         Label name = GUI.scaleableText(username, gui.rootPane.heightProperty(), card.widthProperty(), 25.);
 
-        User userInst = this;
-
         HBox area = new HBox(name);
         area.setAlignment(Pos.CENTER);
         Button profile = new Button("Profile");
+        Button connect = new Button("Connect");
+        VBox twoButtons = new VBox(profile, connect);
+
+        if (connectedUsers.contains(gui.loginInstance.loggedInUser)) {
+            connect.setText("Disconnect");
+        }
 
         card.setLeft(imageBox);
-        card.setRight(profile);
+        card.setRight(twoButtons);
         card.setCenter(area);
 
         //styling
-        logoCircle.radiusProperty().bind(gui.rootPane.heightProperty().divide(18));
-        profile.prefHeightProperty().bind(card.heightProperty());
-        profile.prefWidthProperty().bind(card.widthProperty().divide(6));
 
         DoubleExpression userWidthBaseBind = gui.rootPane.widthProperty().divide(2);
+
+
+        logoCircle.radiusProperty().bind(gui.rootPane.heightProperty().divide(18));
 
         card.prefWidthProperty().bind(userWidthBaseBind);
         card.prefHeightProperty().bind(gui.rootPane.heightProperty().divide(9));
 
-        // TO DO look into making profiles look distinct
+        twoButtons.prefHeightProperty().bind(card.heightProperty());
+        twoButtons.prefWidthProperty().bind(card.widthProperty().divide(6));
+        connect.prefHeightProperty().bind(twoButtons.heightProperty().divide(2));
+        profile.prefHeightProperty().bind(twoButtons.heightProperty().divide(2));
+        connect.prefWidthProperty().bind(twoButtons.widthProperty());
+        profile.prefWidthProperty().bind(twoButtons.widthProperty());
+
+
+
         profile.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if (linkedPage == null) {
-                    linkedPage = new ProfilePage(userInst, gui);
-                }
+                gui.rootPane.setCenter(getLinkedPage(gui).generatePage());
+            }
+        });
 
-                gui.rootPane.setCenter(linkedPage.generatePage());
+        connect.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                User loggedInUser = gui.loginInstance.loggedInUser;
+                if (connect.getText().equalsIgnoreCase("connect")) {
+                    loggedInUser.notifications.add(
+                        NotificationPage.generateNotification(
+                            loggedInUser,
+                            userInst,
+                            gui
+                    ));
+                    connect.setText("Sent!");
+                } else if (connect.getText().equalsIgnoreCase("disconnect")){
+                    userInst.connectedUsers.remove(loggedInUser);
+                    loggedInUser.connectedUsers.remove(userInst);
+                    connect.setText("Connect");
+                }
             }
         });
         return card;
     }
 
-    public VBox generateUserFeed() {
+    /**
+     * Generates a user feed for this user
+     * @param gui the gui this user feed will be added to
+     * @return the user feed
+     */
+    //TODO make this user feed smarter and not just pull from connections
+    public VBox generateUserFeed(GUI gui) {
         VBox feed = new VBox();
         DoubleExpression userWidthBaseBind = gui.rootPane.widthProperty().divide(2);
 
@@ -191,11 +381,8 @@ public class User {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.fitToWidthProperty().setValue(true);
 
-        // add all of the connected users to the user feed
-        for (var user : connectedUsers) {
-            System.out.println(user.username);
-            userList.getChildren().add(user.generateCard());
-        }
+        //TODO remove this, as self shouldn be in user feed, its for testing]
+        userList.getChildren().add(gui.huskyConnectAcc.generateCard(gui));
 
         // add the user feed and scroll pane to the feed
         feed.getChildren().addAll(userFeed, scrollPane);

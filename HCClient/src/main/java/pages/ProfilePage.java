@@ -1,6 +1,8 @@
 package pages;
 
 import actors.User;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -28,28 +30,41 @@ public class ProfilePage {
         this.gui = gui;
         nameField.setText(linkedUser.getUsername());
 
-        String tagsText = "";
+        StringBuilder tagsTextBuilder = new StringBuilder();
         for (var tag : linkedUser.getTags()) {
-            tagsText += "#" + tag + ", ";
+            tagsTextBuilder.append("#").append(tag).append(", ");
         }
-
+        String tagsText = tagsTextBuilder.toString();
+        //Prevents stringindexoutofbounds on tags.settext (for users with no tags)
+        if(tagsText.equals("")){
+            tagsText = ", ";
+        }
         tags.setText(tagsText.substring(0, tagsText.length()-2));
         description.setText(linkedUser.getBio());
-        userFeed = linkedUser.generateUserFeed();
-        icon.setFill(new ImagePattern(linkedUser.getIcon()));
+        userFeed = linkedUser.generateUserFeed(gui);
+        icon.setFill(new ImagePattern(linkedUser.generateImage()));
 
         tags.setEditable(false);
         description.setEditable(false);
         nameField.setEditable(false);
     }
 
+    /**
+     * generates a page for the linked user
+     * @return a profile page
+     */
     public HBox generatePage() {
         // DEFINITIONS
         HBox page = new HBox();
 
 
         Button editButton = new Button("Edit");
-        VBox buttonBox = new VBox(editButton);
+        Button notif = new Button("Notifications");
+        Button saveButton = new Button("Save");
+
+        saveButton.setVisible(false);
+
+        VBox buttonBox = new VBox(editButton, saveButton, notif);
         VBox logoBox = new VBox(icon, buttonBox);
         buttonBox.setAlignment(Pos.CENTER);
         logoBox.setSpacing(GUI.DEFAULT_SPACING);
@@ -72,6 +87,7 @@ public class ProfilePage {
         // set the spacing for the required panes to default
         page.setSpacing(GUI.DEFAULT_SPACING);
         textFieldsBox.setSpacing(GUI.DEFAULT_SPACING);
+        buttonBox.setSpacing(GUI.DEFAULT_SPACING);
 
         // allocate the correct amount of room to the panes
         page.maxWidthProperty().bind(gui.rootPane.widthProperty());
@@ -79,7 +95,6 @@ public class ProfilePage {
 
         page.setAlignment(Pos.CENTER);
         textFieldsBox.setAlignment(Pos.CENTER);
-
 
         textFieldsBox.prefWidthProperty().bind(page.widthProperty().divide(3));
         logoBox.prefWidthProperty().bind(page.widthProperty().divide(6));
@@ -89,7 +104,34 @@ public class ProfilePage {
 
         userFeed.minHeightProperty().bind(gui.rootPane.heightProperty().divide(4));
 
+        if (gui.loginInstance.loggedInUser != linkedUser) {
+            editButton.setVisible(false);
+        }
 
+        editButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                saveButton.setVisible(true);
+                tags.setEditable(true);
+                description.setEditable(true);
+            }
+        });
+
+        saveButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                saveButton.setVisible(false);
+                tags.setEditable(false);
+                description.setEditable(false);
+            }
+        });
+
+        notif.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                gui.rootPane.setCenter(NotificationPage.NotificationPage(gui));
+            }
+        });
         return page;
     }
 
