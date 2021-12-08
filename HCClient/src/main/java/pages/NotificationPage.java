@@ -62,7 +62,7 @@ public class NotificationPage {
 
         VBox imageBox = new VBox(logoCircle);
 
-        Label text = GUI.scaleableText(friendUser.getUsername() + " is requesting to connect with you!", gui.rootPane.heightProperty(), notif.widthProperty(), 12.5);
+        Label text = GUI.scaleableText(friendUser.getUsername() + " is requesting to connect with you!", gui.rootPane.heightProperty(), notif.widthProperty(), .25);
         HBox textBox = new HBox(text);
         Button accept = new Button("Accept");
         Button deny = new Button("Deny");
@@ -91,6 +91,7 @@ public class NotificationPage {
                 notif.setVisible(false);
                 actionUser.notifications.remove(this);
                 actionUser.addConnection(friendUser);
+                friendUser.addConnection(actionUser);
             }
         });
 
@@ -119,8 +120,8 @@ public class NotificationPage {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.fitToWidthProperty().setValue(true);
 
-        //TODO remove this, as self is only added for testing
-        notifList.getChildren().add(generateNotification(gui.loginInstance.loggedInUser, gui.loginInstance.loggedInUser, gui));
+        //TODO remove this, as hc is only added for testing
+        notifList.getChildren().add(generateNotification(gui.loginInstance.loggedInUser, gui.huskyConnectAcc, gui));
         // add the user feed and scroll pane to the feed
         feed.getChildren().addAll(notifFeed, scrollPane);
 
