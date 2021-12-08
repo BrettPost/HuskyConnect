@@ -16,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
+import javafx.scene.paint.Paint;
 import userinterface.GUI;
 
 import static pages.HomePage.loadHomePage;
@@ -57,7 +58,8 @@ public class TopBar {
 
         //Circular profile icon
         //TODO: get user's profile picture
-        Image userIcon = GUI.loadImageResource("\\src\\main\\resources\\default-user-icon.png");
+        Image userIcon = gui.loginInstance.loggedInUser.generateImage();
+        //GUI.loadImageResource("\\src\\main\\resources\\default-user-icon.png");
         Circle userIconCircle = new Circle(1, 1, 1);
         userIconCircle.setFill(new ImagePattern(userIcon));
         Label profileLbl = new Label("Profile");
@@ -114,6 +116,7 @@ public class TopBar {
 
 
         //PROFILE PIC STYLING
+        userIconCircle.setStroke(Paint.valueOf("black")); //creates black border around profile pic
         userIconCircle.radiusProperty().bind(topBar.heightProperty().multiply(5).divide(16)); //bind circle radius proportional to top bar height
         profileBox.minWidthProperty().bind(profileLbl.widthProperty()); //box will be at least as large as the label
         profileLbl.setFont(new Font("Arial", 11));
