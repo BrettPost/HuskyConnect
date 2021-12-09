@@ -48,6 +48,11 @@ public class UserService {
 
     }
 
+    public void updateBio(User user, String bio){
+        user.setBio(bio);
+        userRepository.save(user);
+    }
+
     public List<User> getUsers(){
         return userRepository.findAll();
     }

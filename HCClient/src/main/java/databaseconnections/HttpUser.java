@@ -131,26 +131,22 @@ public class HttpUser extends HttpCon{
         }
     }
 
-    /*
-    public static boolean updateUser(User user, Long token){
+    public static boolean updateBio(String bio, Long token){
+
         try {
-            HttpPut request = new HttpPut(URL + "/users");
-
-            //converts user into json
-            ObjectMapper mapper = new ObjectMapper();
-            String JSON_STRING = mapper.writeValueAsString(user);
-            //adds password to the end of the json
-            JSON_STRING = JSON_STRING.substring(0,JSON_STRING.length() - 1) + ",\"password\": \""+password.hashCode()+"\"}";
-            System.out.println(JSON_STRING);
-
-            StringEntity requestEntity = new StringEntity(JSON_STRING, ContentType.APPLICATION_JSON);
-            request.setEntity(requestEntity);
-            System.out.println(client.execute(request));
-            return true;
-
+            URIBuilder builder = new URIBuilder(URL + "/users");
+            builder.setParameter("tokenId", token.toString());
+            builder.setParameter("bio", bio);
+            var request = new HttpPut(builder.build());
+            HttpResponse response = client.execute(request);
+            if(response.getStatusLine().getStatusCode() == 200){
+                return true;
+            }else {
+                return false;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
-    }*/
+    }
 }

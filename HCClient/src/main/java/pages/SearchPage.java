@@ -1,5 +1,7 @@
 package pages;
 
+import actors.User;
+import databaseconnections.HttpUser;
 import javafx.beans.binding.DoubleExpression;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
@@ -48,8 +50,16 @@ public class SearchPage {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.fitToWidthProperty().setValue(true);
 
-        //TODO: replace adding current user with retrieving and adding search results from database
-        userList.getChildren().add(guiInstance.loginInstance.loggedInUser.generateCard(guiInstance));
+        // gets the search results from users in the database
+        User[] users = HttpUser.getUsers();
+        if(users != null)
+            for (User user :
+                    users) {
+                if(stringCompare(user.getUsername(),search) <= 2 ){
+                    ProfilePage profilePage = user.getLinkedPage(guiInstance);
+                    userList.getChildren().add(user.generateCard(guiInstance));
+                }
+            }
 
         // add the user feed and scroll pane to the feed
         results.getChildren().addAll(searchLbl, scrollPane);
@@ -63,6 +73,33 @@ public class SearchPage {
 
         return results;
 
+    }
+
+    /**
+     * returns the number of chars that are different between the 2 strings
+     * @param str1 first string
+     * @param str2 second string
+     * @return int for the number of chars that are different
+     */
+    private static int stringCompare(String str1, String str2)
+    {
+
+        int l1 = str1.length();
+        int l2 = str2.length();
+        int lmin = Math.min(l1, l2);
+        int lmax = Math.max(l1, l2);
+
+        int count = 0;
+        for (int i = 0; i < lmin; i++) {
+            int str1_ch = (int)str1.charAt(i);
+            int str2_ch = (int)str2.charAt(i);
+
+            if (str1_ch != str2_ch) {
+                count++;
+            }
+        }
+        count += lmax - lmin;
+        return count;
     }
 
 }

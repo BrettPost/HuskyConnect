@@ -244,10 +244,7 @@ public class User {
 
 
     public ProfilePage getLinkedPage(GUI gui) {
-        if (linkedPage == null) {
-            linkedPage = new ProfilePage(this, gui);
-        }
-        return linkedPage;
+        return linkedPage = new ProfilePage(this, gui);
     }
 
 
@@ -291,7 +288,13 @@ public class User {
         area.setAlignment(Pos.CENTER);
         Button profile = new Button("Profile");
         Button connect = new Button("Connect");
-        VBox twoButtons = new VBox(profile, connect);
+        VBox twoButtons = null;
+        if(!userInst.getUsername().equals(LoginInstance.loggedInUser.getUsername())){
+            twoButtons = new VBox(profile, connect);
+        }else{
+            twoButtons = new VBox(profile);
+        }
+
 
         User[] users = HttpConnection.getConnections(username, LoginInstance.token);
         if(users != null)
@@ -358,7 +361,6 @@ public class User {
      * @param gui the gui this user feed will be added to
      * @return the user feed
      */
-    //TODO make this user feed smarter and not just pull from connections
     public VBox generateUserFeed(GUI gui) {
         VBox feed = new VBox();
         DoubleExpression userWidthBaseBind = gui.rootPane.widthProperty().divide(2);

@@ -2,6 +2,7 @@ package pages;
 
 import actors.User;
 import databaseconnections.HttpConnection;
+import databaseconnections.HttpUser;
 import instances.LoginInstance;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -124,6 +125,7 @@ public class ProfilePage {
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                HttpUser.updateBio(description.getText(),LoginInstance.token);
                 saveButton.setVisible(false);
                 tags.setEditable(false);
                 description.setEditable(false);

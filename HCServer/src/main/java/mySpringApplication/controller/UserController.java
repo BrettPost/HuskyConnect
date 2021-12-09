@@ -94,12 +94,12 @@ public class UserController {
      * @return http status
      */
     @PutMapping("")
-    public ResponseEntity<?> update(@RequestBody String bio, @RequestParam String tokenId) {
+    public ResponseEntity<?> update(@RequestParam String bio, @RequestParam String tokenId) {
         //Authentication
         if(Authenticator.getAccess( Long.parseLong(tokenId) ) == null){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        Authenticator.getAccess( Long.parseLong(tokenId) ).setBio(bio);
+        userService.updateBio(Authenticator.getAccess( Long.parseLong(tokenId) ),bio);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
