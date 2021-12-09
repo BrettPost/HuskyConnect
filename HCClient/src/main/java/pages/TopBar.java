@@ -22,6 +22,7 @@ import javafx.scene.paint.Paint;
 import userinterface.GUI;
 
 import static pages.HomePage.loadHomePage;
+import static pages.SearchPage.loadSearchPage;
 
 
 public class TopBar {
@@ -48,14 +49,14 @@ public class TopBar {
 
 
         //Search Bar and Icon
-        TextField search = new TextField();
-        search.setPromptText("Search . . . .");
+        TextField searchInput = new TextField();
+        searchInput.setPromptText("Search . . . .");
         ImageView searchIconView = new ImageView(
                 GUI.loadImageResource("\\src\\main\\resources\\search-icon.png")
         );
         Button searchButton = new Button();
         searchButton.setGraphic(searchIconView);
-        HBox searchBox = new HBox(search, searchButton);
+        HBox searchBox = new HBox(searchInput, searchButton);
 
 
         //Circular profile icon
@@ -100,10 +101,10 @@ public class TopBar {
 
 
         //SEARCH BAR STYLING
-        search.prefWidthProperty().bind(topBar.widthProperty()); //search field will grow with the window size
+        searchInput.prefWidthProperty().bind(topBar.widthProperty()); //search field will grow with the window size
         searchIconView.preserveRatioProperty().setValue(true);
-        searchIconView.fitHeightProperty().bind(search.heightProperty());
-        searchButton.maxHeightProperty().bind(search.heightProperty());
+        searchIconView.fitHeightProperty().bind(searchInput.heightProperty());
+        searchButton.maxHeightProperty().bind(searchInput.heightProperty());
         searchBox.maxWidthProperty().bind(topBar.widthProperty().multiply(5).divide(8)); //search bar width maxes out
         searchBox.setAlignment(Pos.CENTER);
 
@@ -152,21 +153,12 @@ public class TopBar {
         //home icon
         homeBox.setOnMouseClicked( event -> {
             gui.rootPane.setCenter(loadHomePage(gui));
-            System.out.println("Home Icon Clicked");
         });
         //search button
         searchButton.setOnAction( event -> {
 
-            User[] users = HttpUser.getUsers();
-            if(users != null)
-                for (User user :
-                        users) {
-                    if(user.getUsername().equals(search.getText().strip())){
-                        ProfilePage profilePage = user.getLinkedPage(gui);
-                        gui.rootPane.setCenter(profilePage.generatePage());
-                    }
-                }
-
+            gui.rootPane.setCenter(loadSearchPage(gui, searchInput.getText()));
+            searchInput.clear();
         });
 
         //inbox icon
