@@ -171,8 +171,7 @@ public class TopBar {
 
         //inbox icon
         inboxBox.setOnMouseClicked( event -> {
-            //TODO: Go To Inbox Page
-            System.out.println("Inbox Icon Clicked");
+            gui.rootPane.setCenter(NotificationPage.NotificationPage(gui));
         });
 
         //inbox icon

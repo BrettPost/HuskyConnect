@@ -39,7 +39,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-
     public User getUser(String username) {
         if(userRepository.findById(username).isPresent()){
             return userRepository.findById(username).get();

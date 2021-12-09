@@ -89,24 +89,18 @@ public class UserController {
 
     /**
      *
-     * @param user updates user in database
+     * @param bio updates user in database
      * @param tokenId token for user
      * @return http status
      */
     @PutMapping("")
-    public ResponseEntity<?> update(@RequestBody User user, @RequestParam String tokenId) {
+    public ResponseEntity<?> update(@RequestBody String bio, @RequestParam String tokenId) {
         //Authentication
         if(Authenticator.getAccess( Long.parseLong(tokenId) ) == null){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-
-        try {
-            user.setUsername(Objects.requireNonNull(Authenticator.getAccess(Long.parseLong(tokenId))).getUsername());
-            userService.saveUser(user);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Authenticator.getAccess( Long.parseLong(tokenId) ).setBio(bio);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**

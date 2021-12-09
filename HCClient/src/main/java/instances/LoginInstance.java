@@ -25,7 +25,7 @@ public class LoginInstance {
     public User loggedInUser = null;
     GUI gui;
 
-    public Long token = null;
+    public static Long token = null;
 
 
     public LoginInstance(GUI gui) {
