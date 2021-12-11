@@ -12,6 +12,7 @@
 
 #Build file
 build/
+out/
 
 # Idea files
 .idea/

@@ -91,4 +91,26 @@ public class ConnectionController {
     }
 
 
+    /**
+     * Deletes connection
+     * @param username username of the user that is connected with user
+     * @param tokenId token for user
+     * @return http status
+     */
+    @DeleteMapping("")
+    public ResponseEntity<?> delete(@RequestParam String username,@RequestParam String tokenId) {
+        //Authentication
+        User user = Authenticator.getAccess( Long.parseLong(tokenId) );
+        if(user == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        if(connectionService.removeConnection(user.getUsername(), username)){
+            return new ResponseEntity<>(HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+    }
+
+
 }

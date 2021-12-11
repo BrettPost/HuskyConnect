@@ -3,8 +3,10 @@ package actors;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import databaseconnections.HttpCon;
+import databaseconnections.HttpConnection;
 import databaseconnections.HttpTag;
 import databaseconnections.HttpUser;
+import instances.LoginInstance;
 import javafx.beans.binding.DoubleExpression;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -25,11 +27,9 @@ import userinterface.GUI;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class User {
     private String username;
@@ -43,11 +43,7 @@ public class User {
     @JsonIgnore
     public Image img;//javafx representation of imgBlob. imgBlob is the ultimate truth for this duplicate information.
     @JsonIgnore
-    private List<User> connectedUsers;
-    @JsonIgnore
     private ProfilePage linkedPage;
-    @JsonIgnore
-    public List<BorderPane> notifications;
 
     /**
      * default constructor for jackson databind
@@ -56,11 +52,8 @@ public class User {
 
         this.tags = new HashSet<>();
 
-        //TODO make this populated from database
-        this.connectedUsers = new ArrayList<>();
-
-        this.notifications = new ArrayList<>();
     }
+
 
     /**
      * Create a user object
@@ -79,8 +72,6 @@ public class User {
         this.tags = new HashSet<>();
         this.tags.addAll(Arrays.asList(tags));
 
-        this.connectedUsers = new ArrayList<>();
-        this.notifications = new ArrayList<>();
 
         generateImage();
     }
@@ -103,7 +94,6 @@ public class User {
         this.tags = new HashSet<>();
         this.tags.addAll(Arrays.asList(tags));
 
-        this.connectedUsers = new ArrayList<>();
     }
 
     /**
@@ -173,7 +163,6 @@ public class User {
             this.img = new Image(filePath);
         } catch (Exception e) {
             //TODO set image to a fallback image if this failed
-            e.printStackTrace();
         }
 
 
@@ -204,6 +193,9 @@ public class User {
     }
 
     public HashSet<String> getTags() {
+        this.tags = new HashSet<>();
+        addTags(HttpTag.getUserTags(username, LoginInstance.token).strip().split(","));
+
         return tags;
     }
 
@@ -249,20 +241,10 @@ public class User {
         return tags.contains(tag);
     }
 
-    /**
-     * Add a user connection
-     * @param connection the user to connect
-     */
-    public void addConnection(User connection) {
-        connectedUsers.add(connection);
-    }
 
 
     public ProfilePage getLinkedPage(GUI gui) {
-        if (linkedPage == null) {
-            linkedPage = new ProfilePage(this, gui);
-        }
-        return linkedPage;
+        return linkedPage = new ProfilePage(this, gui);
     }
 
 
@@ -306,11 +288,20 @@ public class User {
         area.setAlignment(Pos.CENTER);
         Button profile = new Button("Profile");
         Button connect = new Button("Connect");
-        VBox twoButtons = new VBox(profile, connect);
-
-        if (connectedUsers.contains(gui.loginInstance.loggedInUser)) {
-            connect.setText("Disconnect");
+        VBox twoButtons = null;
+        if(!userInst.getUsername().equals(LoginInstance.loggedInUser.getUsername())){
+            twoButtons = new VBox(profile, connect);
+        }else{
+            twoButtons = new VBox(profile);
         }
+
+
+        User[] users = HttpConnection.getConnections(username, LoginInstance.token);
+        if(users != null)
+            for (User user : users) {
+                if(user.getUsername().equals(gui.loginInstance.loggedInUser.getUsername()))
+                    connect.setText("Disconnect");
+            }
 
         card.setLeft(imageBox);
         card.setRight(twoButtons);
@@ -347,17 +338,18 @@ public class User {
             public void handle(ActionEvent event) {
                 User loggedInUser = gui.loginInstance.loggedInUser;
                 if (connect.getText().equalsIgnoreCase("connect")) {
-                    loggedInUser.notifications.add(
-                        NotificationPage.generateNotification(
-                            loggedInUser,
-                            userInst,
-                            gui
-                    ));
-                    connect.setText("Sent!");
+                    if(HttpConnection.addConnection(userInst.getUsername(),LoginInstance.token)){
+                        connect.setText("Sent!");
+                    }else{
+                        connect.setText("Request Failed!");
+                    }
+
                 } else if (connect.getText().equalsIgnoreCase("disconnect")){
-                    userInst.connectedUsers.remove(loggedInUser);
-                    loggedInUser.connectedUsers.remove(userInst);
-                    connect.setText("Connect");
+                    if(HttpConnection.removeConnection(userInst.getUsername(),LoginInstance.token)){
+                        connect.setText("Removed!");
+                    }else{
+                        connect.setText("Request Failed!");
+                    }
                 }
             }
         });
@@ -369,7 +361,6 @@ public class User {
      * @param gui the gui this user feed will be added to
      * @return the user feed
      */
-    //TODO make this user feed smarter and not just pull from connections
     public VBox generateUserFeed(GUI gui) {
         VBox feed = new VBox();
         DoubleExpression userWidthBaseBind = gui.rootPane.widthProperty().divide(2);
@@ -383,8 +374,10 @@ public class User {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.fitToWidthProperty().setValue(true);
 
-        //TODO remove this, as self shouldn be in user feed, its for testing]
-        userList.getChildren().add(gui.huskyConnectAcc.generateCard(gui));
+        User[] users = HttpConnection.getConnections(this.getUsername(), LoginInstance.token);
+        if(users != null) for(User user : users){
+            userList.getChildren().add(user.generateCard(gui));
+        }
 
         // add the user feed and scroll pane to the feed
         feed.getChildren().addAll(userFeed, scrollPane);
@@ -398,5 +391,18 @@ public class User {
         userList.setSpacing(GUI.DEFAULT_SPACING);
 
         return feed;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(username, user.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username);
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -35,6 +36,20 @@ public class UserController {
         try {
             User user = userService.getUser(username);
             return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     * returns all users
+     * @return all users
+     */
+    @GetMapping("")
+    public ResponseEntity<List<User>> get() {
+
+        try {
+            return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -74,24 +89,18 @@ public class UserController {
 
     /**
      *
-     * @param user updates user in database
+     * @param bio updates user in database
      * @param tokenId token for user
      * @return http status
      */
     @PutMapping("")
-    public ResponseEntity<?> update(@RequestBody User user, @RequestParam String tokenId) {
+    public ResponseEntity<?> update(@RequestParam String bio, @RequestParam String tokenId) {
         //Authentication
         if(Authenticator.getAccess( Long.parseLong(tokenId) ) == null){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-
-        try {
-            user.setUsername(Objects.requireNonNull(Authenticator.getAccess(Long.parseLong(tokenId))).getUsername());
-            userService.saveUser(user);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        userService.updateBio(Authenticator.getAccess( Long.parseLong(tokenId) ),bio);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**

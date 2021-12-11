@@ -9,6 +9,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -72,6 +73,32 @@ public class HttpUser extends HttpCon{
     }
 
     /**
+     * gets all of a users
+     * @return all users
+     */
+    public static User[] getUsers(){
+        try {
+            URIBuilder builder = new URIBuilder(URL + "/users");
+            var request = new HttpGet(builder.build());
+            HttpResponse response = client.execute(request);
+            if(response.getStatusLine().getStatusCode() != 200){
+                //something went wrong
+                System.out.println("Something went wrong with getting the users, returning null");
+                return null;
+            }else{
+                //user jackson to build the list of users
+                ObjectMapper mapper = new ObjectMapper();
+                return mapper.readValue(response.getEntity().getContent(), User[].class);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+
+    }
+
+    /**
      * Saves a user in the database
      * @param user The user parsed from the GUI input
      * @param password The password parsed from GUI input
@@ -98,6 +125,25 @@ public class HttpUser extends HttpCon{
             System.out.println(client.execute(request));
             return true;
 
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean updateBio(String bio, Long token){
+
+        try {
+            URIBuilder builder = new URIBuilder(URL + "/users");
+            builder.setParameter("tokenId", token.toString());
+            builder.setParameter("bio", bio);
+            var request = new HttpPut(builder.build());
+            HttpResponse response = client.execute(request);
+            if(response.getStatusLine().getStatusCode() == 200){
+                return true;
+            }else {
+                return false;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return false;

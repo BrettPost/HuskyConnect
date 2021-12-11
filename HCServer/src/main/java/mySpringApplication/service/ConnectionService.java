@@ -1,9 +1,6 @@
 package mySpringApplication.service;
 
-import mySpringApplication.model.Connection;
-import mySpringApplication.model.User;
-import mySpringApplication.model.UserTag;
-import mySpringApplication.model.UserTagId;
+import mySpringApplication.model.*;
 import mySpringApplication.repository.ConnectionRepository;
 import mySpringApplication.repository.UserRepository;
 import mySpringApplication.repository.UserTagRepository;
@@ -99,6 +96,24 @@ public class ConnectionService {
         //add the connection request
         connectionRepository.save(new Connection(user1,user2,false));
         return true;
+    }
+
+    /**
+     * removes a connection or connection request
+     * @param user1 first user
+     * @param user2 second user
+     * @return true if the connection was successfully removed
+     */
+    public boolean removeConnection(String user1, String user2){
+        if(connectionRepository.findById(new ConnectionId(user1,user2)).isPresent()){
+            connectionRepository.delete( connectionRepository.findById(new ConnectionId(user1,user2)).get() );
+            return true;
+        }else if(connectionRepository.findById(new ConnectionId(user2,user1)).isPresent()){
+            connectionRepository.delete( connectionRepository.findById(new ConnectionId(user2,user1)).get() );
+            return true;
+        }else{
+            return false;
+        }
     }
 
 }

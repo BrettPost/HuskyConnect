@@ -49,4 +49,12 @@ public class HttpConnectionTest extends TestCase {
     public void testAddConnection(){
         System.out.println(HttpConnection.addConnection("husky",tokenId));
     }
+
+    public void testGetUsers(){
+        User[] users = HttpUser.getUsers();
+        for (User user :
+                users) {
+            System.out.println(user.getUsername());
+        }
+    }
 }

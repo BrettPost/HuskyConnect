@@ -22,10 +22,10 @@ import static pages.HomePage.loadHomePage;
 import static userinterface.GUI.loadImageResource;
 
 public class LoginInstance {
-    public User loggedInUser = null;
+    public static User loggedInUser = null;
     GUI gui;
 
-    public Long token = null;
+    public static Long token = null;
 
 
     public LoginInstance(GUI gui) {

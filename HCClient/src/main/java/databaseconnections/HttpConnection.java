@@ -3,6 +3,7 @@ package databaseconnections;
 import actors.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -90,6 +91,26 @@ public class HttpConnection extends HttpCon{
             return false;
         }
 
+    }
+
+    /**
+     * removes a connection
+     * @param username username of one of the connected users
+     * @param tokenId token for the user of the other connected user
+     * @return true if the connection was successfully removed
+     */
+    public static boolean removeConnection(String username, Long tokenId){
+        try{
+            URIBuilder builder = new URIBuilder(URL + "/connections");
+            builder.setParameter("username", username);
+            builder.setParameter("tokenId", tokenId.toString());
+            HttpDelete request = new HttpDelete(builder.build());
+            HttpResponse response = client.execute(request);
+            return response.getStatusLine().getStatusCode() == 200;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

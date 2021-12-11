@@ -4,6 +4,7 @@ import actors.User;
 import databaseconnections.HttpCon;
 import databaseconnections.HttpTag;
 import databaseconnections.HttpUser;
+import instances.LoginInstance;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -223,16 +224,15 @@ public class SignUpPage {
                         bio.getText(),
                         holding.getImage().getUrl(),
                         tagsResponse);
-                //Stay on the current page if the user couldn't sign up for any reason
-                if(HttpUser.saveUser(newUser, password.getText())) {
-                    gui.loginInstance.setLoggedInUser(newUser);
-                    gui.rootPane.setCenter(loadHomePage(gui));
-                }
+
+                HttpUser.saveUser(newUser, password.getText());
 
                 //saves the tags for the user
-                Long token = Long.parseLong( HttpCon.readResponse( HttpUser.login(username,password.getText()) ).strip() );
+                LoginInstance.token = Long.parseLong( HttpCon.readResponse( HttpUser.login(username,password.getText()) ).strip() );
+                gui.loginInstance.setLoggedInUser(newUser);
+                gui.rootPane.setCenter(loadHomePage(gui));
                 for (String tag : tagsResponse) {
-                    HttpTag.saveUserTag(tag,token);
+                    HttpTag.saveUserTag(tag,LoginInstance.token);
                 }
             }
         });

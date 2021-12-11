@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class UserService {
@@ -37,7 +39,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-
     public User getUser(String username) {
         if(userRepository.findById(username).isPresent()){
             return userRepository.findById(username).get();
@@ -45,6 +46,15 @@ public class UserService {
             return null;
         }
 
+    }
+
+    public void updateBio(User user, String bio){
+        user.setBio(bio);
+        userRepository.save(user);
+    }
+
+    public List<User> getUsers(){
+        return userRepository.findAll();
     }
 
     public void deleteUser(User user) {

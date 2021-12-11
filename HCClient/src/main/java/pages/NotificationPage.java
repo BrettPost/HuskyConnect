@@ -1,6 +1,8 @@
 package pages;
 
 import actors.User;
+import databaseconnections.HttpConnection;
+import instances.LoginInstance;
 import javafx.beans.binding.DoubleExpression;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -89,9 +91,7 @@ public class NotificationPage {
             @Override
             public void handle(ActionEvent event) {
                 notif.setVisible(false);
-                actionUser.notifications.remove(this);
-                actionUser.addConnection(friendUser);
-                friendUser.addConnection(actionUser);
+                HttpConnection.addConnection(friendUser.getUsername(), LoginInstance.token);
             }
         });
 
@@ -99,7 +99,7 @@ public class NotificationPage {
             @Override
             public void handle(ActionEvent event) {
                 notif.setVisible(false);
-                actionUser.notifications.remove(this);
+                HttpConnection.removeConnection(friendUser.getUsername(),LoginInstance.token);
             }
         });
 
@@ -120,8 +120,10 @@ public class NotificationPage {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.fitToWidthProperty().setValue(true);
 
-        //TODO remove this, as hc is only added for testing
-        notifList.getChildren().add(generateNotification(gui.loginInstance.loggedInUser, gui.huskyConnectAcc, gui));
+        User[] users = HttpConnection.getConnectionRequests(LoginInstance.token);
+        if(users != null) for (User user : users){
+            notifList.getChildren().add(generateNotification(gui.loginInstance.loggedInUser, user, gui));
+        }
         // add the user feed and scroll pane to the feed
         feed.getChildren().addAll(notifFeed, scrollPane);
 

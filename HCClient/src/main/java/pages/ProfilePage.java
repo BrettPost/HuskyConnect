@@ -1,6 +1,9 @@
 package pages;
 
 import actors.User;
+import databaseconnections.HttpConnection;
+import databaseconnections.HttpUser;
+import instances.LoginInstance;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -59,12 +62,12 @@ public class ProfilePage {
 
 
         Button editButton = new Button("Edit");
-        Button notif = new Button("Notifications");
         Button saveButton = new Button("Save");
+        Button connectButton = new Button("Connect");
 
         saveButton.setVisible(false);
 
-        VBox buttonBox = new VBox(editButton, saveButton, notif);
+        VBox buttonBox = new VBox(editButton, saveButton, connectButton);
         VBox logoBox = new VBox(icon, buttonBox);
         buttonBox.setAlignment(Pos.CENTER);
         logoBox.setSpacing(GUI.DEFAULT_SPACING);
@@ -104,8 +107,10 @@ public class ProfilePage {
 
         userFeed.minHeightProperty().bind(gui.rootPane.heightProperty().divide(4));
 
-        if (gui.loginInstance.loggedInUser != linkedUser) {
+        if (!gui.loginInstance.loggedInUser.equals(linkedUser)) {
             editButton.setVisible(false);
+        }else{
+            connectButton.setVisible(false);
         }
 
         editButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -120,16 +125,18 @@ public class ProfilePage {
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                HttpUser.updateBio(description.getText(),LoginInstance.token);
                 saveButton.setVisible(false);
                 tags.setEditable(false);
                 description.setEditable(false);
             }
         });
 
-        notif.setOnAction(new EventHandler<ActionEvent>() {
+        connectButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                gui.rootPane.setCenter(NotificationPage.NotificationPage(gui));
+                HttpConnection.addConnection(linkedUser.getUsername(), LoginInstance.token);
+                connectButton.setText("Sent!");
             }
         });
         return page;
